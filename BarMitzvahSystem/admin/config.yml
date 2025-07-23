@@ -1,0 +1,175 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "static/images"
+public_folder: "/images"
+
+locale: "he"
+
+collections:
+  - name: "events"
+    label: "אירועים"
+    folder: "content/events"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "שם בר המצווה", name: "name", widget: "string" }
+      - { label: "תאריך", name: "date", widget: "datetime" }
+      - { label: "שעה", name: "time", widget: "string" }
+      - { label: "הגעת אורחים", name: "guestArrivalTime", widget: "string", required: false }
+      - { label: "תחילת אירוע", name: "eventStartTime", widget: "string", required: false }
+      - { label: "מיקום", name: "location", widget: "string" }
+      - { label: "קישור Waze", name: "wazeLink", widget: "string", required: false }
+      - { label: "חבילה", name: "package", widget: "select", options: ["חבילה בסיסית", "חבילה חגיגית", "חבילת הכל כלול"] }
+      - { label: "קלידן", name: "keyboardist", widget: "boolean", default: false }
+      - { label: "מתופפים", name: "drummers", widget: "number", default: 0 }
+      - { label: "תלמיד?", name: "isStudent", widget: "boolean", default: false }
+      - { label: "מחיר", name: "price", widget: "number" }
+      - { label: "שם הורה", name: "parentName", widget: "string" }
+      - { label: "טלפון הורה", name: "parentPhone", widget: "string" }
+      - { label: "הערות", name: "notes", widget: "text", required: false }
+      - { label: "סטטוס", name: "status", widget: "select", options: ["confirmed", "pending"] }
+      - label: "קישורי מדיה"
+        name: "mediaLinks"
+        widget: "object"
+        fields:
+          - { label: "קישור לתמונות", name: "photos", widget: "string", required: false }
+          - { label: "קישור לסרטונים", name: "videos", widget: "string", required: false }
+
+  - name: "students"
+    label: "תלמידים"
+    folder: "content/students"
+    create: true
+    slug: "{{name}}"
+    fields:
+      - { label: "שם", name: "name", widget: "string" }
+      - { label: "תאריך אירוע", name: "eventDate", widget: "datetime" }
+      - { label: "שיעורים שהושלמו", name: "lessonsCompleted", widget: "number" }
+      - { label: "סה\"כ שיעורים", name: "totalLessons", widget: "number" }
+      - { label: "שיעור הבא", name: "nextLesson", widget: "datetime" }
+      - { label: "טלפון", name: "phone", widget: "string" }
+      - { label: "התקדמות", name: "progress", widget: "text" }
+      - { label: "פרשה", name: "parsha", widget: "string" }
+      - { label: "סוג קריאה", name: "readingType", widget: "string" }
+      - { label: "יש הקלטה?", name: "hasRecording", widget: "boolean" }
+      - { label: "הערות הקלטה", name: "recordingNotes", widget: "text", required: false }
+      - { label: "הפטרה", name: "haftarah", widget: "string" }
+      - { label: "קטע בתורה", name: "torahPortion", widget: "string" }
+      - { label: "הערות מיוחדות", name: "specialNotes", widget: "text", required: false }
+
+  - name: "songs"
+    label: "שירים"
+    folder: "content/songs"
+    create: true
+    slug: "{{name}}"
+    fields:
+      - { label: "שם", name: "name", widget: "string" }
+      - { label: "סולם", name: "key", widget: "string" }
+      - { label: "קצב", name: "tempo", widget: "number" }
+      - { label: "טרנספוזיציה", name: "transpose", widget: "number", default: 0 }
+      - { label: "אקורדים", name: "chords", widget: "text" }
+      - { label: "מילים", name: "lyrics", widget: "text" }
+      - { label: "קטגוריה", name: "category", widget: "select", options: ["כניסה", "תפילה", "הוצאת ספר תורה", "ברכות", "סעודה", "הבדלה", "חתונה", "מזמורים", "כללי"] }
+      - { label: "קישור יוטיוב", name: "youtubeLink", widget: "string", required: false }
+
+  - name: "equipment"
+    label: "ציוד"
+    folder: "content/equipment"
+    create: true
+    slug: "{{item}}"
+    fields:
+      - { label: "פריט", name: "item", widget: "string" }
+      - { label: "סומן?", name: "checked", widget: "boolean", default: false }
+      - { label: "קטגוריה", name: "category", widget: "select", options: ["קול", "כלי נגינה", "טכני", "אביזרים"] }
+
+  - name: "payments"
+    label: "תשלומים"
+    folder: "content/payments"
+    create: true
+    slug: "{{eventName}}"
+    fields:
+      - { label: "שם אירוע", name: "eventName", widget: "string" }
+      - { label: "שולם לקלידן?", name: "keyboardistPaid", widget: "boolean" }
+      - { label: "סכום לקלידן", name: "keyboardistAmount", widget: "number" }
+      - { label: "שולם למתופפים?", name: "drummersPaid", widget: "boolean" }
+      - { label: "סכום למתופפים", name: "drummersAmount", widget: "number" }
+      - { label: "הוצאה קבלה?", name: "receiptIssued", widget: "boolean" }
+      - { label: "שולם למנהל?", name: "managerPaid", widget: "boolean" }
+      - { label: "סכום למנהל", name: "managerAmount", widget: "number" }
+
+  - name: "lessons"
+    label: "שיעורים"
+    folder: "content/lessons"
+    create: true
+    slug: "{{studentName}}-{{date}}"
+    fields:
+      - { label: "שם תלמיד", name: "studentName", widget: "string" }
+      - { label: "תאריך", name: "date", widget: "datetime" }
+      - { label: "שעה", name: "time", widget: "string" }
+      - { label: "משך בדקות", name: "duration", widget: "number" }
+      - { label: "סוג", name: "type", widget: "select", options: ["lesson", "event"] }
+      - { label: "סטטוס", name: "status", widget: "string" }
+
+  - name: "blocked_dates"
+    label: "תאריכים חסומים"
+    folder: "content/blocked-dates"
+    create: true
+    slug: "{{date}}"
+    fields:
+      - { label: "תאריך", name: "date", widget: "datetime" }
+      - { label: "סיבה", name: "reason", widget: "string" }
+
+  - name: "message_templates"
+    label: "תבניות הודעה"
+    folder: "content/message-templates"
+    create: true
+    slug: "{{name}}"
+    fields:
+      - { label: "שם תבנית", name: "name", widget: "string" }
+      - { label: "תוכן", name: "content", widget: "text" }
+
+  - name: "message_history"
+    label: "היסטוריית הודעות"
+    folder: "content/message-history"
+    create: true
+    slug: "{{id}}"
+    fields:
+      - { label: "נמען", name: "recipient", widget: "string" }
+      - { label: "טלפון", name: "phone", widget: "string" }
+      - { label: "הודעה", name: "message", widget: "text" }
+      - { label: "נשלחה בתאריך", name: "sent", widget: "datetime" }
+      - { label: "סטטוס", name: "status", widget: "string" }
+
+  - name: "song_categories"
+    label: "קטגוריות שירים"
+    folder: "content/song-categories"
+    create: true
+    slug: "{{name}}"
+    fields:
+      - { label: "שם קטגוריה", name: "name", widget: "string" }
+      - { label: "צבע", name: "color", widget: "string" }
+      - { label: "אייקון", name: "icon", widget: "string" }
+
+  - name: "playlists"
+    label: "פלייליסטים"
+    folder: "content/playlists"
+    create: true
+    slug: "{{name}}"
+    fields:
+      - { label: "שם", name: "name", widget: "string" }
+      - { label: "שירים", name: "songs", widget: "list", field: {label: "שיר", name: "song", widget: "number"} }
+      - { label: "סוג אירוע", name: "eventType", widget: "string" }
+      - { label: "תיאור", name: "description", widget: "text", required: false }
+
+  - name: "important_links"
+    label: "קישורים חשובים"
+    folder: "content/important-links"
+    create: true
+    slug: "{{name}}"
+    fields:
+      - { label: "שם", name: "name", widget: "string" }
+      - { label: "קישור", name: "url", widget: "string" }
+      - { label: "תיאור", name: "description", widget: "string", required: false }
+      - { label: "קטגוריה", name: "category", widget: "string", required: false }
+      - { label: "אייקון", name: "icon", widget: "string", required: false }
