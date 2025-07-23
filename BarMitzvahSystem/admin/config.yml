@@ -10,7 +10,7 @@ locale: "he"
 collections:
   - name: "events"
     label: "אירועים"
-    folder: "content/events"
+    folder: "BarMitzvahSystem/BarMitzvahSystem/content/events"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
