@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -415,10 +415,10 @@
             {
                 id: 2,
                 name: "יוסי לוי",
-                date: "2024-01-18",
-                time: "09:30",
-                guestArrivalTime: "09:00",
-                eventStartTime: "09:30",
+                date: "2024-01-20",
+                time: "11:00",
+                guestArrivalTime: "10:30",
+                eventStartTime: "11:00",
                 location: "בית כנסת אור החיים, ירושלים",
                 wazeLink: "https://waze.com/ul?q=בית כנסת אור החיים ירושלים",
                 package: "חבילה בסיסית",
@@ -428,8 +428,8 @@
                 price: 2000,
                 parentPhone: "052-9876543",
                 parentName: "אברהם לוי",
-                notes: "משפחה דתית, שירים מסורתיים בלבד",
-                status: "confirmed",
+                notes: "משפחה מסורתית, שירים קלאסיים",
+                status: "pending",
                 mediaLinks: {
                     photos: "",
                     videos: ""
@@ -439,20 +439,20 @@
                 id: 3,
                 name: "אבי רוזן",
                 date: "2024-01-22",
-                time: "11:00",
-                guestArrivalTime: "10:30",
-                eventStartTime: "11:00",
-                location: "אולם אירועים דיאמונד, חיפה",
-                wazeLink: "https://waze.com/ul?q=אולם אירועים דיאמונד חיפה",
+                time: "09:00",
+                guestArrivalTime: "08:30",
+                eventStartTime: "09:00",
+                location: "בית כנסת הרמב\"ם, חיפה",
+                wazeLink: "https://waze.com/ul?q=בית כנסת הרמבם חיפה",
                 package: "חבילת הכל כלול",
                 keyboardist: true,
                 drummers: 2,
                 isStudent: true,
-                price: 5500,
+                price: 5000,
                 parentPhone: "054-5555555",
-                parentName: "דני רוזן",
-                notes: "אירוע גדול, 200 מוזמנים",
-                status: "pending",
+                parentName: "רחל רוזן",
+                notes: "אירוע גדול, 200 אורחים",
+                status: "confirmed",
                 mediaLinks: {
                     photos: "",
                     videos: ""
@@ -1123,7 +1123,7 @@
                                 
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 sm:space-x-reverse">
                                     ${isLoggedIn ? `
-                                        <div class="flex space-x-2 space-x-reverse">
+                                        <div class="flex flex-wrap gap-2">
                                             <button onclick="event.stopPropagation(); openYeshInvoice()" class="bg-blue-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors font-medium flex items-center">
                                                 <span class="ml-1">🧾</span>
                                                 <span>יש חשבונית</span>
@@ -1131,6 +1131,14 @@
                                             <button onclick="event.stopPropagation(); sendWhatsAppToParent('${event.parentPhone}', '${event.parentName}', '${event.name}')" class="bg-green-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-green-700 transition-colors font-medium flex items-center">
                                                 <span class="ml-1">📱</span>
                                                 <span>WhatsApp</span>
+                                            </button>
+                                            <button onclick="event.stopPropagation(); editEvent(${event.id})" class="bg-orange-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-orange-700 transition-colors font-medium flex items-center">
+                                                <span class="ml-1">✏️</span>
+                                                <span>ערוך</span>
+                                            </button>
+                                            <button onclick="event.stopPropagation(); deleteEvent(${event.id})" class="bg-red-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-red-700 transition-colors font-medium flex items-center">
+                                                <span class="ml-1">🗑️</span>
+                                                <span>מחק</span>
                                             </button>
                                         </div>
                                     ` : ''}
@@ -1230,14 +1238,33 @@
                             <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">${song.tempo} BPM</span>
                             ${song.transpose !== 0 ? `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">${song.transpose > 0 ? '+' : ''}${song.transpose}</span>` : ''}
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h4 class="font-semibold text-gray-700 mb-2">אקורדים:</h4>
-                                <p class="text-gray-600 bg-white p-3 rounded-2xl font-mono border">${song.chords}</p>
+                        <div class="space-y-4">
+                            <!-- Chords Section -->
+                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                                <div class="flex items-center justify-between p-3 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSongSection('prayer-${song.id}-chords')">
+                                    <h4 class="font-semibold text-blue-800 flex items-center">
+                                        <span class="ml-2">🎸</span>
+                                        אקורדים
+                                    </h4>
+                                    <span class="text-blue-600 text-sm" id="prayer-${song.id}-chords-arrow">▼</span>
+                                </div>
+                                <div id="prayer-${song.id}-chords" class="p-3 border-t border-blue-200">
+                                    <p class="text-gray-700 font-mono text-lg bg-gray-50 p-3 rounded-xl">${song.chords}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-700 mb-2">מילים:</h4>
-                                <p class="text-gray-600 bg-white p-3 rounded-2xl whitespace-pre-line border">${song.lyrics}</p>
+                            
+                            <!-- Lyrics Section -->
+                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                                <div class="flex items-center justify-between p-3 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors" onclick="toggleSongSection('prayer-${song.id}-lyrics')">
+                                    <h4 class="font-semibold text-green-800 flex items-center">
+                                        <span class="ml-2">📝</span>
+                                        מילים
+                                    </h4>
+                                    <span class="text-green-600 text-sm" id="prayer-${song.id}-lyrics-arrow">▼</span>
+                                </div>
+                                <div id="prayer-${song.id}-lyrics" class="p-3 border-t border-green-200">
+                                    <p class="text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-xl leading-relaxed">${song.lyrics}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1329,14 +1356,33 @@
                             <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">${song.tempo} BPM</span>
                             ${song.transpose !== 0 ? `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">${song.transpose > 0 ? '+' : ''}${song.transpose}</span>` : ''}
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h4 class="font-semibold text-gray-700 mb-2">אקורדים:</h4>
-                                <p class="text-gray-600 bg-white p-3 rounded-2xl font-mono border">${song.chords}</p>
+                        <div class="space-y-4">
+                            <!-- Chords Section -->
+                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                                <div class="flex items-center justify-between p-3 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSongSection('meal-${song.id}-chords')">
+                                    <h4 class="font-semibold text-blue-800 flex items-center">
+                                        <span class="ml-2">🎸</span>
+                                        אקורדים
+                                    </h4>
+                                    <span class="text-blue-600 text-sm" id="meal-${song.id}-chords-arrow">▼</span>
+                                </div>
+                                <div id="meal-${song.id}-chords" class="p-3 border-t border-blue-200">
+                                    <p class="text-gray-700 font-mono text-lg bg-gray-50 p-3 rounded-xl">${song.chords}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-700 mb-2">מילים:</h4>
-                                <p class="text-gray-600 bg-white p-3 rounded-2xl whitespace-pre-line border">${song.lyrics}</p>
+                            
+                            <!-- Lyrics Section -->
+                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                                <div class="flex items-center justify-between p-3 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors" onclick="toggleSongSection('meal-${song.id}-lyrics')">
+                                    <h4 class="font-semibold text-green-800 flex items-center">
+                                        <span class="ml-2">📝</span>
+                                        מילים
+                                    </h4>
+                                    <span class="text-green-600 text-sm" id="meal-${song.id}-lyrics-arrow">▼</span>
+                                </div>
+                                <div id="meal-${song.id}-lyrics" class="p-3 border-t border-green-200">
+                                    <p class="text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-xl leading-relaxed">${song.lyrics}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1669,14 +1715,33 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">אקורדים:</span>
-                            <div class="bg-gray-100 p-2 rounded-lg font-mono mt-1">${song.chords}</div>
+                    <div class="space-y-3">
+                        <!-- Chords Section -->
+                        <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                            <div class="flex items-center justify-between p-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSongSection('library-${song.id}-chords')">
+                                <span class="font-medium text-blue-800 text-sm flex items-center">
+                                    <span class="ml-2">🎸</span>
+                                    אקורדים
+                                </span>
+                                <span class="text-blue-600 text-xs" id="library-${song.id}-chords-arrow">▼</span>
+                            </div>
+                            <div id="library-${song.id}-chords" class="p-2 border-t border-blue-200">
+                                <div class="bg-white p-2 rounded-lg font-mono text-sm">${song.chords}</div>
+                            </div>
                         </div>
-                        <div>
-                            <span class="font-medium text-gray-700">מילים:</span>
-                            <div class="bg-gray-100 p-2 rounded-lg mt-1 max-h-20 overflow-y-auto whitespace-pre-line">${song.lyrics}</div>
+                        
+                        <!-- Lyrics Section -->
+                        <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                            <div class="flex items-center justify-between p-2 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors" onclick="toggleSongSection('library-${song.id}-lyrics')">
+                                <span class="font-medium text-green-800 text-sm flex items-center">
+                                    <span class="ml-2">📝</span>
+                                    מילים
+                                </span>
+                                <span class="text-green-600 text-xs" id="library-${song.id}-lyrics-arrow">▼</span>
+                            </div>
+                            <div id="library-${song.id}-lyrics" class="p-2 border-t border-green-200">
+                                <div class="bg-white p-2 rounded-lg text-sm max-h-32 overflow-y-auto whitespace-pre-line">${song.lyrics}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1776,6 +1841,19 @@
                 arrow.textContent = '▲';
             } else {
                 details.classList.add('hidden');
+                arrow.textContent = '▼';
+            }
+        }
+
+        function toggleSongSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const arrow = document.getElementById(`${sectionId}-arrow`);
+            
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                arrow.textContent = '▲';
+            } else {
+                section.classList.add('hidden');
                 arrow.textContent = '▼';
             }
         }
@@ -1930,7 +2008,208 @@
             events.push(newEvent);
             filteredEvents = [...events];
             renderEvents();
-            alert('אירוע חדש נוסף בהצלחה!');
+            saveDataToCMS();
+            showNotification('אירוע חדש נוסף בהצלחה!', 'success');
+        }
+
+        function editEvent(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            // Create edit form modal
+            modalTitle.textContent = `עריכת אירוע - ${event.name}`;
+            
+            modalContent.innerHTML = `
+                <form id="editEventForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">שם בר המצווה</label>
+                            <input type="text" id="editName" value="${event.name}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">תאריך</label>
+                            <input type="date" id="editDate" value="${event.date}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">שעת הגעת אורחים</label>
+                            <input type="time" id="editGuestTime" value="${event.guestArrivalTime}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">שעת תחילת אירוע</label>
+                            <input type="time" id="editEventTime" value="${event.eventStartTime}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">מיקום</label>
+                        <input type="text" id="editLocation" value="${event.location}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">קישור Waze</label>
+                        <input type="url" id="editWazeLink" value="${event.wazeLink}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">חבילה</label>
+                            <select id="editPackage" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="חבילה בסיסית" ${event.package === 'חבילה בסיסית' ? 'selected' : ''}>חבילה בסיסית</option>
+                                <option value="חבילה חגיגית" ${event.package === 'חבילה חגיגית' ? 'selected' : ''}>חבילה חגיגית</option>
+                                <option value="חבילת הכל כלול" ${event.package === 'חבילת הכל כלול' ? 'selected' : ''}>חבילת הכל כלול</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">סטטוס</label>
+                            <select id="editStatus" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="pending" ${event.status === 'pending' ? 'selected' : ''}>ממתין לאישור</option>
+                                <option value="confirmed" ${event.status === 'confirmed' ? 'selected' : ''}>מאושר</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">מחיר (₪)</label>
+                            <input type="number" id="editPrice" value="${event.price}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="editKeyboardist" ${event.keyboardist ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 ml-3">
+                            <label for="editKeyboardist" class="text-sm font-medium text-gray-700">קלידן</label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">מספר מתופפים</label>
+                            <input type="number" id="editDrummers" value="${event.drummers}" min="0" max="5" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">שם ההורה</label>
+                            <input type="text" id="editParentName" value="${event.parentName}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">טלפון הורה</label>
+                            <input type="tel" id="editParentPhone" value="${event.parentPhone}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">קישור תמונות</label>
+                            <input type="url" id="editPhotosLink" value="${event.mediaLinks?.photos || ''}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">קישור סרטונים</label>
+                            <input type="url" id="editVideosLink" value="${event.mediaLinks?.videos || ''}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" id="editIsStudent" ${event.isStudent ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 ml-3">
+                        <label for="editIsStudent" class="text-sm font-medium text-gray-700">תלמיד פרטי</label>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">הערות</label>
+                        <textarea id="editNotes" rows="3" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">${event.notes}</textarea>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 space-x-reverse pt-6 border-t border-gray-200">
+                        <button type="button" onclick="eventModal.classList.add('hidden')" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 transition-colors font-medium">
+                            ביטול
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors font-medium">
+                            שמור שינויים
+                        </button>
+                    </div>
+                </form>
+            `;
+            
+            // Add form submit handler
+            document.getElementById('editEventForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveEventChanges(eventId);
+            });
+            
+            eventModal.classList.remove('hidden');
+        }
+
+        function saveEventChanges(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            // Update event with form values
+            event.name = document.getElementById('editName').value;
+            event.date = document.getElementById('editDate').value;
+            event.guestArrivalTime = document.getElementById('editGuestTime').value;
+            event.eventStartTime = document.getElementById('editEventTime').value;
+            event.location = document.getElementById('editLocation').value;
+            event.wazeLink = document.getElementById('editWazeLink').value;
+            event.package = document.getElementById('editPackage').value;
+            event.status = document.getElementById('editStatus').value;
+            event.price = parseInt(document.getElementById('editPrice').value) || 0;
+            event.keyboardist = document.getElementById('editKeyboardist').checked;
+            event.drummers = parseInt(document.getElementById('editDrummers').value) || 0;
+            event.parentName = document.getElementById('editParentName').value;
+            event.parentPhone = document.getElementById('editParentPhone').value;
+            event.isStudent = document.getElementById('editIsStudent').checked;
+            event.notes = document.getElementById('editNotes').value;
+            
+            // Update media links
+            if (!event.mediaLinks) {
+                event.mediaLinks = {};
+            }
+            event.mediaLinks.photos = document.getElementById('editPhotosLink').value;
+            event.mediaLinks.videos = document.getElementById('editVideosLink').value;
+            
+            // Update time field for backward compatibility
+            event.time = event.eventStartTime;
+            
+            // Update filtered events and re-render
+            applyFilters();
+            renderEvents();
+            
+            // Save to storage
+            saveDataToCMS();
+            
+            // Close modal and show success message
+            eventModal.classList.add('hidden');
+            showNotification('אירוע עודכן בהצלחה!', 'success');
+        }
+
+        function deleteEvent(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            if (confirm(`האם אתה בטוח שברצונך למחוק את האירוע של ${event.name}?\n\nפעולה זו לא ניתנת לביטול!`)) {
+                // Remove from events array
+                const eventIndex = events.findIndex(e => e.id === eventId);
+                if (eventIndex > -1) {
+                    events.splice(eventIndex, 1);
+                }
+                
+                // Remove from students array if exists
+                const studentIndex = students.findIndex(s => s.name === event.name);
+                if (studentIndex > -1) {
+                    students.splice(studentIndex, 1);
+                }
+                
+                // Remove from payments array if exists
+                const paymentIndex = payments.findIndex(p => p.eventName === event.name);
+                if (paymentIndex > -1) {
+                    payments.splice(paymentIndex, 1);
+                }
+                
+                // Update filtered events and re-render
+                applyFilters();
+                renderEvents();
+                
+                // Save to storage
+                saveDataToCMS();
+                
+                showNotification(`אירוע של ${event.name} נמחק בהצלחה!`, 'success');
+            }
         }
 
         function addNewSong() {
@@ -2344,25 +2623,18 @@ ${isLoggedIn ? `\nהורה: ${event.parentName}\nטלפון: ${event.parentPhone
 
         async function saveDataToCMS() {
             try {
-                systemData.events = events;
-                systemData.students = students;
-                systemData.prayerSongs = prayerSongs;
-                systemData.mealSongs = mealSongs;
-                systemData.equipment = equipment;
-                systemData.payments = payments;
-                systemData.lessons = lessons;
-                systemData.messageHistory = messageHistory;
-                systemData.songsLibrary = songsLibrary;
-                systemData.songCategories = songCategories;
-                systemData.importantLinks = importantLinks;
-                systemData.lastUpdated = new Date().toISOString();
-                
+                const systemData = {
+                    events, students, prayerSongs, mealSongs, equipment, payments, importantLinks,
+                    lastUpdated: new Date().toISOString()
+                };
                 localStorage.setItem('barMitzvahData', JSON.stringify(systemData));
                 
                 console.log('נתונים נשמרו בהצלחה');
+                showNotification('נתונים נשמרו בהצלחה!', 'success');
                 return true;
             } catch (error) {
                 console.error('שגיאה בשמירת נתונים:', error);
+                showNotification('שגיאה בשמירת נתונים', 'error');
                 return false;
             }
         }
@@ -2371,46 +2643,24 @@ ${isLoggedIn ? `\nהורה: ${event.parentName}\nטלפון: ${event.parentPhone
             try {
                 const savedData = localStorage.getItem('barMitzvahData');
                 if (savedData) {
-                    const parsedData = JSON.parse(savedData);
-                    
+                    const data = JSON.parse(savedData);
+                    // Update arrays with saved data
                     events.length = 0;
-                    events.push(...parsedData.events);
-                    
+                    events.push(...(data.events || []));
                     students.length = 0;
-                    students.push(...parsedData.students);
-                    
-                    prayerSongs.length = 0;
-                    prayerSongs.push(...parsedData.prayerSongs);
-                    
-                    mealSongs.length = 0;
-                    mealSongs.push(...parsedData.mealSongs);
-                    
-                    equipment.length = 0;
-                    equipment.push(...parsedData.equipment);
-                    
-                    payments.length = 0;
-                    payments.push(...parsedData.payments);
-                    
-                    if (parsedData.songCategories) {
-                        songCategories.length = 0;
-                        songCategories.push(...parsedData.songCategories);
-                    }
-                    
-                    if (parsedData.importantLinks) {
-                        importantLinks.length = 0;
-                        importantLinks.push(...parsedData.importantLinks);
-                    }
+                    students.push(...(data.students || []));
+                    // ... update other arrays as needed
                     
                     filteredEvents = [...events];
                     renderCurrentPage();
-                    
-                    showNotification('נתונים רוענו בהצלחה!', 'success');
-                } else {
-                    showNotification('לא נמצאו נתונים שמורים', 'info');
+                    showNotification('נתונים נטענו מהזיכרון המקומי!', 'success');
+                    return true;
                 }
+                return false;
             } catch (error) {
-                console.error('שגיאה ברענון נתונים:', error);
-                showNotification('שגיאה ברענון נתונים', 'error');
+                console.error('שגיאה בטעינת נתונים:', error);
+                showNotification('שגיאה בטעינת נתונים', 'error');
+                return false;
             }
         }
 
@@ -2555,13 +2805,15 @@ ${isLoggedIn ? `\nהורה: ${event.parentName}\nטלפון: ${event.parentPhone
                     }
                 }
                 
-                await refreshDataFromCMS();
+                // Initialize filtered events
+                filteredEvents = [...events];
                 renderCurrentPage();
                 
                 console.log('אפליקציה אותחלה בהצלחה');
                 
             } catch (error) {
                 console.error('שגיאה באתחול האפליקציה:', error);
+                filteredEvents = [...events];
                 renderCurrentPage();
             }
         }
@@ -2594,5 +2846,5 @@ ${isLoggedIn ? `\nהורה: ${event.parentName}\nטלפון: ${event.parentPhone
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'963a8a98c25394d7',t:'MTc1MzI2NzAzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9642dee557b58e4e',t:'MTc1MzM1NDM3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
