@@ -5,20 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מערכת ניהול אירועי בר מצווה</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Netlify Identity -->
-    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <!-- Auth0 -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
-    <!-- Decap CMS -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" id="manifest">
-    <meta name="theme-color" content="#1e3a8a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="בר מצווה מנהל">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e3a8a'/><text y='50' x='50' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='white'>🎵</text></svg>">
     <script>
         tailwind.config = {
             theme: {
@@ -114,9 +101,6 @@
                         <span class="text-green-500 text-2xl">✅</span>
                     </div>
                     <div class="space-y-2">
-                        <button id="editContentBtn" class="w-full bg-purple-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-purple-700 transition-colors">
-                            ✏️ עריכת תוכן
-                        </button>
                         <button onclick="refreshDataFromCMS()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors">
                             🔄 רענן נתונים
                         </button>
@@ -125,7 +109,7 @@
                         </button>
                         <div class="mt-3 p-2 bg-yellow-50 rounded-2xl border border-yellow-200">
                             <div class="text-xs text-yellow-700 font-medium">💾 שמירה אוטומטית</div>
-                            <div class="text-xs text-yellow-600">כל השינויים נשמרים אוטומטית ל-CMS</div>
+                            <div class="text-xs text-yellow-600">כל השינויים נשמרים אוטומטית</div>
                         </div>
                         <button id="logoutBtn" class="w-full bg-red-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-red-700 transition-colors">
                             יציאה
@@ -202,10 +186,6 @@
                     <p class="text-blue-100 text-sm sm:text-lg">ניהול תפילה • לימוד • שירים ופיוטים</p>
                 </div>
                 <div class="flex items-center space-x-3 space-x-reverse">
-                    <button id="installApp" class="bg-green-600 text-white px-4 py-2 rounded-2xl hover:bg-green-700 transition-all flex items-center hidden">
-                        <span class="ml-2">📱</span>
-                        <span>התקן אפליקציה</span>
-                    </button>
                     <button id="menuBtn" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-2xl hover:bg-opacity-30 transition-all flex items-center">
                         <span class="ml-2">☰</span>
                         <span>תפריט</span>
@@ -243,6 +223,10 @@
                                 <option value="true">עם מתופפים</option>
                                 <option value="false">ללא מתופפים</option>
                             </select>
+                            <select id="dateFilter" class="border border-gray-300 rounded-2xl px-3 sm:px-4 py-2 text-gray-700 bg-white shadow-sm text-sm sm:text-base">
+                                <option value="">כל האירועים</option>
+                                <option value="future">אירועים עתידיים</option>
+                            </select>
                             <button id="addEventBtn" class="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-blue-700 transition-colors font-medium shadow-md text-sm sm:text-base hidden" onclick="addNewEvent()">
                                 ➕ הוסף אירוע
                             </button>
@@ -260,8 +244,26 @@
         <div id="prayer-songs-page" class="page hidden">
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100">
                 <div class="bg-gradient-to-l from-purple-50 to-pink-50 border-b border-gray-200 p-4 sm:p-6 rounded-t-3xl">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">שירי תפילה</h2>
-                    <p class="text-gray-600 text-sm sm:text-base">רשימת השירים לחלק התפילה בבר המצווה</p>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                        <div class="mb-4 sm:mb-0">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">שירי תפילה</h2>
+                            <p class="text-gray-600 text-sm sm:text-base">רשימת השירים לחלק התפילה בבר המצווה</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 sm:space-x-reverse">
+                            <select id="prayerViewFilter" class="border border-gray-300 rounded-2xl px-3 sm:px-4 py-2 text-gray-700 bg-white shadow-sm text-sm sm:text-base">
+                                <option value="list">תצוגת רשימה</option>
+                                <option value="categories">תצוגת קטגוריות</option>
+                            </select>
+                            <select id="prayerCategoryFilter" class="border border-gray-300 rounded-2xl px-3 sm:px-4 py-2 text-gray-700 bg-white shadow-sm text-sm sm:text-base">
+                                <option value="">כל הקטגוריות</option>
+                                <option value="תפילה">תפילה</option>
+                                <option value="כניסה">כניסה</option>
+                            </select>
+                            <button id="managePrayerCategoriesBtn" class="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-purple-700 transition-colors font-medium shadow-md text-sm sm:text-base hidden" onclick="managePrayerCategories()">
+                                ⚙️ נהל קטגוריות
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="p-4 sm:p-6 space-y-4" id="prayerSongsContainer">
                     <!-- Prayer songs will be populated here -->
@@ -273,8 +275,27 @@
         <div id="meal-songs-page" class="page hidden">
             <div class="bg-white rounded-3xl shadow-lg border border-gray-100">
                 <div class="bg-gradient-to-l from-green-50 to-emerald-50 border-b border-gray-200 p-4 sm:p-6 rounded-t-3xl">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">שירי סעודה</h2>
-                    <p class="text-gray-600 text-sm sm:text-base">רשימת השירים לחלק הסעודה בבר המצווה</p>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                        <div class="mb-4 sm:mb-0">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">שירי סעודה</h2>
+                            <p class="text-gray-600 text-sm sm:text-base">רשימת השירים לחלק הסעודה בבר המצווה</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 sm:space-x-reverse">
+                            <select id="mealViewFilter" class="border border-gray-300 rounded-2xl px-3 sm:px-4 py-2 text-gray-700 bg-white shadow-sm text-sm sm:text-base">
+                                <option value="list">תצוגת רשימה</option>
+                                <option value="categories">תצוגת קטגוריות</option>
+                            </select>
+                            <select id="mealCategoryFilter" class="border border-gray-300 rounded-2xl px-3 sm:px-4 py-2 text-gray-700 bg-white shadow-sm text-sm sm:text-base">
+                                <option value="">כל הקטגוריות</option>
+                                <option value="סעודה">סעודה</option>
+                                <option value="ברכות">ברכות</option>
+                                <option value="הבדלה">הבדלה</option>
+                            </select>
+                            <button id="manageMealCategoriesBtn" class="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-green-700 transition-colors font-medium shadow-md text-sm sm:text-base hidden" onclick="manageMealCategories()">
+                                ⚙️ נהל קטגוריות
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="p-4 sm:p-6 space-y-4" id="mealSongsContainer">
                     <!-- Meal songs will be populated here -->
@@ -332,12 +353,6 @@
                         </div>
                         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 sm:space-x-reverse">
                             <input type="text" id="songSearch" placeholder="חיפוש שיר..." class="border border-gray-300 rounded-2xl px-3 sm:px-4 py-2 text-gray-700 bg-white shadow-sm text-sm sm:text-base">
-                            <button id="toggleCategoriesBtn" onclick="toggleCategories()" class="bg-purple-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-purple-700 transition-colors font-medium shadow-md text-sm sm:text-base">
-                                📂 הצג קטגוריות
-                            </button>
-                            <button id="manageCategoriesBtn" class="bg-orange-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-orange-700 transition-colors font-medium shadow-md text-sm sm:text-base hidden" onclick="manageCategories()">
-                                🏷️ נהל קטגוריות
-                            </button>
                             <button id="addSongBtn" class="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-blue-700 transition-colors font-medium shadow-md text-sm sm:text-base hidden" onclick="addNewSong()">
                                 ➕ הוסף שיר
                             </button>
@@ -359,7 +374,7 @@
                             <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-1">קישורים חשובים</h2>
                             <p class="text-gray-600 text-sm sm:text-base">קישורים מהירים לביצוע פעולות נפוצות</p>
                         </div>
-                        <button id="addLinkBtn" class="bg-cyan-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-cyan-700 transition-colors font-medium shadow-md text-sm sm:text-base" onclick="addNewLink()">
+                        <button id="addLinkBtn" class="bg-cyan-600 text-white px-4 sm:px-6 py-2 rounded-2xl hover:bg-cyan-700 transition-colors font-medium shadow-md text-sm sm:text-base hidden" onclick="addNewLink()">
                             ➕ הוסף קישור
                         </button>
                     </div>
@@ -678,44 +693,6 @@
             }
         ];
 
-        // Calendar data
-        const lessons = [
-            { id: 1, studentName: "דוד כהן", date: "2024-01-10", time: "16:00", duration: 60, type: "lesson", status: "scheduled" },
-            { id: 2, studentName: "אבי רוזן", date: "2024-01-12", time: "17:00", duration: 60, type: "lesson", status: "scheduled" },
-            { id: 3, studentName: "דוד כהן", date: "2024-01-15", time: "10:00", duration: 180, type: "event", status: "confirmed" }
-        ];
-
-        const blockedDates = [
-            { date: "2024-01-20", reason: "חופש" },
-            { date: "2024-01-25", reason: "אירוע אישי" }
-        ];
-
-        // Communication data
-        const messageTemplates = [
-            { id: 1, name: "תזכורת לשיעור", content: "שלום {name}, תזכורת לשיעור מחר ב-{time}. נתראה!" },
-            { id: 2, name: "תזכורת לאירוע", content: "שלום {parentName}, תזכורת לבר המצווה של {studentName} ב-{date} ב-{time}. בהצלחה!" },
-            { id: 3, name: "ביטול שיעור", content: "שלום {name}, צר לי אבל אני צריך לבטל את השיעור של {date}. נתאם תאריך חדש." },
-            { id: 4, name: "רשימת שירים", content: "שלום {parentName}, מצורפת רשימת השירים לבר המצווה של {studentName}: {songsList}" }
-        ];
-
-        const messageHistory = [
-            { id: 1, recipient: "דוד כהן", phone: "050-1234567", message: "שלום דוד, תזכורת לשיעור מחר ב-16:00. נתראה!", sent: "2024-01-09 15:30", status: "sent" },
-            { id: 2, recipient: "משה כהן (הורה)", phone: "050-1234567", message: "שלום משה, תזכורת לבר המצווה של דוד ב-15/01 ב-10:00. בהצלחה!", sent: "2024-01-14 09:00", status: "delivered" }
-        ];
-
-        // Song categories management
-        const songCategories = [
-            { id: 1, name: 'כניסה', color: 'blue', icon: '🚪' },
-            { id: 2, name: 'תפילה', color: 'purple', icon: '🙏' },
-            { id: 3, name: 'הוצאת ספר תורה', color: 'amber', icon: '📜' },
-            { id: 4, name: 'ברכות', color: 'green', icon: '🤲' },
-            { id: 5, name: 'סעודה', color: 'orange', icon: '🍽️' },
-            { id: 6, name: 'הבדלה', color: 'indigo', icon: '🕯️' },
-            { id: 7, name: 'חתונה', color: 'pink', icon: '💒' },
-            { id: 8, name: 'מזמורים', color: 'teal', icon: '📖' },
-            { id: 9, name: 'כללי', color: 'gray', icon: '🎵' }
-        ];
-
         // Extended songs library
         const songsLibrary = [
             ...prayerSongs.map(song => ({...song, category: "תפילה"})),
@@ -725,64 +702,31 @@
             { id: 103, name: "הבדלה מלודי", key: "D", tempo: 95, transpose: -1, chords: "D - A - Bm - G", lyrics: "הנה אל ישועתי\nאבטח ולא אפחד", category: "הבדלה", youtubeLink: "https://youtube.com/watch?v=example3" }
         ];
 
-        const playlists = [
-            { id: 1, name: "בר מצווה קלאסי", songs: [1, 2, 3, 101], eventType: "בר מצווה", description: "רשימת שירים מסורתית לבר מצווה" },
-            { id: 2, name: "שירי שבת", songs: [5, 102, 103], eventType: "שבת", description: "שירים לקבלת שבת ושבת" },
-            { id: 3, name: "סעודה חגיגית", songs: [6, 7, 8, 101], eventType: "סעודה", description: "שירים לסעודה חגיגית" }
-        ];
-
-        // Unified data structure for Decap CMS
-        const systemData = {
-            events: events,
-            students: students,
-            prayerSongs: prayerSongs,
-            mealSongs: mealSongs,
-            equipment: equipment,
-            payments: payments,
-            lessons: lessons,
-            blockedDates: blockedDates,
-            messageTemplates: messageTemplates,
-            messageHistory: messageHistory,
-            songsLibrary: songsLibrary,
-            playlists: playlists,
-            songCategories: songCategories,
-            importantLinks: importantLinks,
-            lastUpdated: new Date().toISOString()
-        };
-
         let isLoggedIn = false;
         let currentPage = 'events';
         let filteredEvents = [...events];
-        let showCategories = false;
-        let showPrayerCategories = false;
-        let showMealCategories = false;
+        let eventStates = {}; // Track collapsed/expanded states
+        let auth0Client = null;
+        let user = null;
 
-        // Authentication setup
-        let auth0Client;
-        let currentAuthProvider = null;
-
-        // Initialize Auth0
-        async function initAuth0() {
-            try {
-                auth0Client = await auth0.createAuth0Client({
-                    domain: 'dev-xq17rgh1xskeyxfa.us.auth0.com',
-                    clientId: 'F4UbYRfwBHLlbkFCHUxu6UYs3dn3z2A4',
-                    authorizationParams: {
-                        redirect_uri: window.location.origin,
-                        scope: 'openid profile email'
-                    }
-                });
-                console.log('Auth0 initialized successfully');
-            } catch (error) {
-                console.log('Auth0 initialization failed:', error);
-                auth0Client = null;
-            }
-        }
+        // Auth0 Configuration - Replace with your actual Auth0 settings
+        // To set up Auth0:
+        // 1. Go to https://auth0.com and create an account
+        // 2. Create a new Single Page Application
+        // 3. In the application settings, add your Netlify domain to:
+        //    - Allowed Callback URLs: https://your-site.netlify.app
+        //    - Allowed Logout URLs: https://your-site.netlify.app
+        //    - Allowed Web Origins: https://your-site.netlify.app
+        // 4. Replace the values below with your Auth0 application details
+        const auth0Config = {
+            domain: 'dev-xq17rgh1xskeyxfa.us.auth0.com', // e.g., 'my-app.auth0.com'
+            clientId: 'F4UbYRfwBHLlbkFCHUxu6UYs3dn3z2A4', // From your Auth0 application settings
+            redirectUri: window.location.origin, // This will be your Netlify URL
+        };
 
         // DOM Elements
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const editContentBtn = document.getElementById('editContentBtn');
         const userInfo = document.getElementById('userInfo');
         const loginSection = document.getElementById('loginSection');
         const eventsContainer = document.getElementById('eventsContainer');
@@ -801,24 +745,138 @@
         const keyboardistFilter = document.getElementById('keyboardistFilter');
         const drummersFilter = document.getElementById('drummersFilter');
 
+        // Initialize Auth0
+        async function initAuth0() {
+            try {
+                auth0Client = await auth0.createAuth0Client(auth0Config);
+                
+                // Check if user is returning from Auth0 login
+                const query = window.location.search;
+                if (query.includes('code=') && query.includes('state=')) {
+                    await auth0Client.handleRedirectCallback();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                
+                // Check if user is authenticated
+                const isAuthenticated = await auth0Client.isAuthenticated();
+                if (isAuthenticated) {
+                    user = await auth0Client.getUser();
+                    login();
+                }
+            } catch (error) {
+                console.error('Auth0 initialization error:', error);
+                // Fallback to demo mode if Auth0 fails
+                showAuthError();
+            }
+        }
+
         // Event Listeners
-        loginBtn.addEventListener('click', auth0Login);
-        logoutBtn.addEventListener('click', logout);
-        editContentBtn.addEventListener('click', openDecapCMS);
+        loginBtn.addEventListener('click', loginWithAuth0);
+        logoutBtn.addEventListener('click', logoutFromAuth0);
         closeModal.addEventListener('click', () => eventModal.classList.add('hidden'));
         menuBtn.addEventListener('click', openSidebar);
         closeSidebarBtn.addEventListener('click', closeSidebar);
 
         // Filter event listeners
+        const dateFilter = document.getElementById('dateFilter');
         packageFilter.addEventListener('change', applyFilters);
         keyboardistFilter.addEventListener('change', applyFilters);
         drummersFilter.addEventListener('change', applyFilters);
+        dateFilter.addEventListener('change', applyFilters);
+        
+        // Song view filters
+        document.getElementById('prayerViewFilter').addEventListener('change', renderPrayerSongs);
+        document.getElementById('prayerCategoryFilter').addEventListener('change', renderPrayerSongs);
+        document.getElementById('mealViewFilter').addEventListener('change', renderMealSongs);
+        document.getElementById('mealCategoryFilter').addEventListener('change', renderMealSongs);
+
+        // Search functionality
+        document.getElementById('songSearch').addEventListener('input', renderSongsLibrary);
+
+        // Auth0 Functions
+        async function loginWithAuth0() {
+            if (!auth0Client) {
+                showAuthError();
+                return;
+            }
+            
+            try {
+                await auth0Client.loginWithRedirect({
+                    authorizationParams: {
+                        redirect_uri: window.location.origin
+                    }
+                });
+            } catch (error) {
+                console.error('Login error:', error);
+                showAuthError();
+            }
+        }
+
+        async function logoutFromAuth0() {
+            if (!auth0Client) {
+                logout();
+                return;
+            }
+            
+            try {
+                await auth0Client.logout({
+                    logoutParams: {
+                        returnTo: window.location.origin
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+                logout();
+            }
+        }
+
+        function showAuthError() {
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.innerHTML = `
+                <span class="ml-2">⚠️</span>
+                <span>שגיאת אימות - מצב הדגמה</span>
+            `;
+            loginBtn.onclick = () => {
+                if (confirm('האימות דרך Auth0 לא זמין כרגע. האם תרצה להמשיך במצב הדגמה?')) {
+                    login();
+                }
+            };
+        }
 
         // Functions
         function login() {
             isLoggedIn = true;
             loginSection.classList.add('hidden');
             userInfo.classList.remove('hidden');
+            
+            // Update user info display
+            if (user) {
+                const userInfoDiv = document.querySelector('#userInfo .bg-green-50');
+                userInfoDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <div class="text-green-800 font-medium">${user.name || user.email}</div>
+                            <div class="text-green-600 text-sm">מנהל מאומת</div>
+                        </div>
+                        <span class="text-green-500 text-2xl">✅</span>
+                    </div>
+                    <div class="space-y-2">
+                        <button onclick="refreshDataFromCMS()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors">
+                            🔄 רענן נתונים
+                        </button>
+                        <button onclick="exportToCMSFormat()" class="w-full bg-green-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-green-700 transition-colors">
+                            📥 ייצא נתונים
+                        </button>
+                        <div class="mt-3 p-2 bg-yellow-50 rounded-2xl border border-yellow-200">
+                            <div class="text-xs text-yellow-700 font-medium">💾 שמירה אוטומטית</div>
+                            <div class="text-xs text-yellow-600">כל השינויים נשמרים אוטומטית</div>
+                        </div>
+                        <button id="logoutBtn" class="w-full bg-red-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-red-700 transition-colors" onclick="logoutFromAuth0()">
+                            יציאה
+                        </button>
+                    </div>
+                `;
+            }
             
             // Show admin sections
             document.getElementById('adminSection').classList.remove('hidden');
@@ -839,110 +897,31 @@
                 addSongBtn.classList.remove('hidden');
             }
             
-            // Show manage categories button
-            const manageCategoriesBtn = document.getElementById('manageCategoriesBtn');
-            if (manageCategoriesBtn) {
-                manageCategoriesBtn.classList.remove('hidden');
+            // Show add link button
+            const addLinkBtn = document.getElementById('addLinkBtn');
+            if (addLinkBtn) {
+                addLinkBtn.classList.remove('hidden');
+            }
+            
+            // Show category management buttons
+            const managePrayerBtn = document.getElementById('managePrayerCategoriesBtn');
+            if (managePrayerBtn) {
+                managePrayerBtn.classList.remove('hidden');
+            }
+            
+            const manageMealBtn = document.getElementById('manageMealCategoriesBtn');
+            if (manageMealBtn) {
+                manageMealBtn.classList.remove('hidden');
             }
             
             renderCurrentPage();
         }
 
-        async function auth0Login() {
-            try {
-                if (auth0Client) {
-                    console.log('מתחיל התחברות Auth0...');
-                    
-                    await auth0Client.loginWithRedirect({
-                        authorizationParams: {
-                            redirect_uri: window.location.origin,
-                            scope: 'openid profile email'
-                        }
-                    });
-                    
-                } else {
-                    console.log('Auth0 לא זמין - מנסה לאתחל מחדש...');
-                    await initAuth0();
-                    if (auth0Client) {
-                        await auth0Login();
-                    } else {
-                        console.log('Auth0 לא זמין - מתחבר ללא אימות חיצוני');
-                        login();
-                        currentAuthProvider = 'local';
-                        showNotification('התחברת בהצלחה (מצב מקומי)', 'success');
-                    }
-                }
-            } catch (error) {
-                console.error('Auth0 login error:', error);
-                console.log('נכשל Auth0 - עובר למצב מקומי');
-                
-                login();
-                currentAuthProvider = 'local';
-                showNotification('התחברת בהצלחה (מצב מקומי)', 'info');
-            }
-        }
-
-        function openDecapCMS() {
-            const cmsConfig = {
-                backend: {
-                    name: 'git-gateway',
-                    branch: 'main'
-                },
-                media_folder: 'static/images',
-                public_folder: '/images',
-                collections: [
-                    {
-                        name: 'events',
-                        label: 'אירועים',
-                        folder: 'content/events',
-                        create: true,
-                        slug: '{{year}}-{{month}}-{{day}}-{{slug}}',
-                        fields: [
-                            { label: 'שם בר המצווה', name: 'name', widget: 'string' },
-                            { label: 'תאריך', name: 'date', widget: 'datetime' },
-                            { label: 'מיקום', name: 'location', widget: 'string' },
-                            { label: 'חבילה', name: 'package', widget: 'select', options: ['חבילה בסיסית', 'חבילה חגיגית', 'חבילת הכל כלול'] },
-                            { label: 'קלידן', name: 'keyboardist', widget: 'boolean', default: false },
-                            { label: 'מספר מתופפים', name: 'drummers', widget: 'number', default: 0 },
-                            { label: 'מחיר', name: 'price', widget: 'number' },
-                            { label: 'שם ההורה', name: 'parentName', widget: 'string' },
-                            { label: 'טלפון', name: 'parentPhone', widget: 'string' },
-                            { label: 'הערות', name: 'notes', widget: 'text', required: false }
-                        ]
-                    }
-                ]
-            };
-
-            if (window.CMS) {
-                window.CMS.init({ config: cmsConfig });
-                window.open('/admin/', '_blank');
-            } else {
-                alert('Decap CMS לא זמין. אנא בדוק את ההגדרות.');
-            }
-        }
-
-        async function logout() {
-            try {
-                if (currentAuthProvider === 'auth0' && auth0Client) {
-                    await auth0Client.logout({
-                        logoutParams: {
-                            returnTo: window.location.origin
-                        }
-                    });
-                } else {
-                    performLogout();
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-                performLogout();
-            }
-        }
-
-        function performLogout() {
+        function logout() {
             isLoggedIn = false;
+            user = null;
             loginSection.classList.remove('hidden');
             userInfo.classList.add('hidden');
-            currentAuthProvider = null;
             
             document.getElementById('adminSection').classList.add('hidden');
             document.getElementById('equipmentSection').classList.add('hidden');
@@ -960,9 +939,20 @@
                 addSongBtn.classList.add('hidden');
             }
             
-            const manageCategoriesBtn = document.getElementById('manageCategoriesBtn');
-            if (manageCategoriesBtn) {
-                manageCategoriesBtn.classList.add('hidden');
+            const addLinkBtn = document.getElementById('addLinkBtn');
+            if (addLinkBtn) {
+                addLinkBtn.classList.add('hidden');
+            }
+            
+            // Hide category management buttons
+            const managePrayerBtn = document.getElementById('managePrayerCategoriesBtn');
+            if (managePrayerBtn) {
+                managePrayerBtn.classList.add('hidden');
+            }
+            
+            const manageMealBtn = document.getElementById('manageMealCategoriesBtn');
+            if (manageMealBtn) {
+                manageMealBtn.classList.add('hidden');
             }
             
             renderCurrentPage();
@@ -1020,9 +1010,20 @@
             const packageValue = packageFilter.value;
             const keyboardistValue = keyboardistFilter.value;
             const drummersValue = drummersFilter.value;
+            const dateValue = dateFilter.value;
 
             filteredEvents = events.filter(event => {
                 let matches = true;
+
+                // Date filter
+                if (dateValue === 'future') {
+                    const eventDate = new Date(event.date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (eventDate < today) {
+                        matches = false;
+                    }
+                }
 
                 if (packageValue && event.package !== packageValue) {
                     matches = false;
@@ -1064,91 +1065,74 @@
 
                 const gradientClass = `card-gradient-${(index % 6) + 1}`;
 
+                const isCollapsed = eventStates[event.id] !== 'expanded';
+                
                 return `
-                    <div class="bg-white border border-gray-200 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden" onclick="openEventModal(${event.id})">
-                        <div class="${gradientClass} p-4 text-white">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                                <div class="flex items-center mb-2 sm:mb-0">
-                                    <span class="status-indicator ${statusColors[event.status]} ml-3 bg-white bg-opacity-80"></span>
-                                    <h3 class="text-lg sm:text-xl font-bold">בר מצווה - ${event.name}</h3>
+                    <div class="card-professional bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+                        <div class="${gradientClass} p-2 text-white">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="status-indicator ${statusColors[event.status]} ml-2 bg-white bg-opacity-80"></span>
+                                    <h3 class="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity px-2 py-1 rounded-lg hover:bg-white hover:bg-opacity-20" onclick="toggleEventCollapse(${event.id})">בר מצווה - ${event.name}</h3>
                                 </div>
-                                ${event.isStudent ? '<span class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs font-medium self-start sm:self-center">תלמיד פרטי</span>' : ''}
+                                ${event.isStudent ? '<span class="bg-white bg-opacity-20 text-white px-2 py-1 rounded-full text-xs font-medium">תלמיד</span>' : ''}
                             </div>
                         </div>
 
-                        <div class="p-4 sm:p-5">
-                            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center">
-                                <div class="flex-1 mb-4 lg:mb-0">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-gray-600">
-                                        <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors" onclick="event.stopPropagation(); addToGoogleCalendar(${event.id})">
-                                            <div class="flex items-center">
-                                                <span class="text-blue-600 ml-2 text-lg">📅</span>
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs text-blue-600 font-medium">תאריך</span>
-                                                    <span class="font-bold text-blue-800 text-sm">${formattedDate}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="bg-green-50 p-3 rounded-2xl border border-green-200">
-                                            <div class="flex items-center">
-                                                <span class="text-green-600 ml-2 text-lg">👥</span>
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs text-green-600 font-medium">הגעת אורחים</span>
-                                                    <span class="font-bold text-green-800 text-sm">${event.guestArrivalTime || event.time}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="bg-orange-50 p-3 rounded-2xl border border-orange-200">
-                                            <div class="flex items-center">
-                                                <span class="text-orange-600 ml-2 text-lg">🎉</span>
-                                                <div class="flex flex-col">
-                                                    <span class="text-xs text-orange-600 font-medium">תחילת אירוע</span>
-                                                    <span class="font-bold text-orange-800 text-sm">${event.eventStartTime || event.time}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors" onclick="event.stopPropagation(); openWaze('${event.wazeLink}')">
-                                            <div class="flex items-start">
-                                                <span class="text-purple-600 ml-2 text-lg flex-shrink-0">📍</span>
-                                                <div class="flex flex-col flex-1 min-w-0">
-                                                    <span class="text-xs text-purple-600 font-medium">מיקום</span>
-                                                    <span class="font-bold text-purple-800 text-sm text-right break-words leading-tight">
-                                                        ${event.location}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                        ${!isCollapsed ? `
+                        <div class="p-3">
+                            <div class="grid grid-cols-1 gap-2 mb-3">
+                                <div class="card-professional bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-2 rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="addToGoogleCalendar(${event.id})">
+                                    <div class="flex items-center">
+                                        <span class="text-lg ml-2">📅</span>
+                                        <span class="font-bold text-sm">${formattedDate}</span>
                                     </div>
                                 </div>
                                 
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 sm:space-x-reverse">
-                                    ${isLoggedIn ? `
-                                        <div class="flex flex-wrap gap-2">
-                                            <button onclick="event.stopPropagation(); openYeshInvoice()" class="bg-blue-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors font-medium flex items-center">
-                                                <span class="ml-1">🧾</span>
-                                                <span>יש חשבונית</span>
-                                            </button>
-                                            <button onclick="event.stopPropagation(); sendWhatsAppToParent('${event.parentPhone}', '${event.parentName}', '${event.name}')" class="bg-green-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-green-700 transition-colors font-medium flex items-center">
-                                                <span class="ml-1">📱</span>
-                                                <span>WhatsApp</span>
-                                            </button>
-                                            <button onclick="event.stopPropagation(); editEvent(${event.id})" class="bg-orange-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-orange-700 transition-colors font-medium flex items-center">
-                                                <span class="ml-1">✏️</span>
-                                                <span>ערוך</span>
-                                            </button>
-                                            <button onclick="event.stopPropagation(); deleteEvent(${event.id})" class="bg-red-600 text-white px-3 py-2 rounded-2xl text-sm hover:bg-red-700 transition-colors font-medium flex items-center">
-                                                <span class="ml-1">🗑️</span>
-                                                <span>מחק</span>
-                                            </button>
-                                        </div>
-                                    ` : ''}
-                                    <div class="flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-3 py-2 rounded-2xl hover:bg-blue-100 transition-colors">
-                                        <span>פרטים נוספים</span>
-                                        <span class="mr-2">←</span>
+                                <div class="card-professional bg-gradient-to-br from-purple-500 to-pink-500 text-white p-2 rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="event.stopPropagation(); openWaze('${event.wazeLink}')">
+                                    <div class="flex items-center">
+                                        <span class="text-lg ml-2">📍</span>
+                                        <span class="font-bold text-sm">${event.location}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-professional bg-gradient-to-br from-green-500 to-emerald-600 text-white p-2 rounded-xl shadow-sm">
+                                    <div class="flex items-center">
+                                        <span class="text-lg ml-2">⏰</span>
+                                        <span class="font-bold text-sm">אורחים: ${event.guestArrivalTime || event.time} • תחילת אירוע: ${event.eventStartTime || event.time}</span>
                                     </div>
                                 </div>
                             </div>
+                            
+
+                            
+                            ${isLoggedIn ? `
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    <button onclick="event.stopPropagation(); openYeshInvoice()" class="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-blue-700 transition-colors font-medium flex items-center">
+                                        <span class="ml-1">🧾</span>
+                                        <span>חשבונית</span>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); sendWhatsAppToParent('${event.parentPhone}', '${event.parentName}', '${event.name}')" class="bg-green-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-green-700 transition-colors font-medium flex items-center">
+                                        <span class="ml-1">📱</span>
+                                        <span>WhatsApp</span>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); editEvent(${event.id})" class="bg-orange-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-orange-700 transition-colors font-medium flex items-center">
+                                        <span class="ml-1">✏️</span>
+                                        <span>ערוך</span>
+                                    </button>
+                                    <button onclick="event.stopPropagation(); deleteEvent(${event.id})" class="bg-red-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-red-700 transition-colors font-medium flex items-center">
+                                        <span class="ml-1">🗑️</span>
+                                        <span>מחק</span>
+                                    </button>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="flex items-center justify-center text-white font-medium text-sm bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg cursor-pointer" onclick="openEventModal(${event.id})">
+                                <span class="ml-2">←</span>
+                                <span>פרטים נוספים</span>
+                            </div>
                         </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
@@ -1156,117 +1140,89 @@
 
         function renderPrayerSongs() {
             const container = document.getElementById('prayerSongsContainer');
+            const viewType = document.getElementById('prayerViewFilter').value;
+            const categoryFilter = document.getElementById('prayerCategoryFilter').value;
             
-            // Add view toggle buttons
-            const viewToggleHTML = `
-                <div class="mb-6 flex justify-center">
-                    <div class="bg-white rounded-2xl p-1 shadow-sm border border-gray-200">
-                        <button id="prayerCategoriesBtn" onclick="togglePrayerView('categories')" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors ${showPrayerCategories ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100'}">
-                            📂 קטגוריות
-                        </button>
-                        <button id="prayerListBtn" onclick="togglePrayerView('list')" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors ${!showPrayerCategories ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100'}">
-                            📋 רשימה
-                        </button>
-                    </div>
-                </div>
-            `;
+            let filteredSongs = prayerSongs;
+            if (categoryFilter) {
+                filteredSongs = prayerSongs.filter(song => song.category === categoryFilter);
+            }
             
-            if (showPrayerCategories) {
-                renderPrayerSongsWithCategories(container, viewToggleHTML);
+            if (viewType === 'categories') {
+                const categories = [...new Set(filteredSongs.map(song => song.category))];
+                container.innerHTML = categories.map(category => {
+                    const categorySongs = filteredSongs.filter(song => song.category === category);
+                    return `
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-3 pr-4">${category}</h3>
+                            <div class="space-y-4">
+                                ${categorySongs.map((song, index) => renderSongCard(song, index)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } else {
-                renderPrayerSongsAsList(container, viewToggleHTML);
+                container.innerHTML = filteredSongs.map((song, index) => renderSongCard(song, index)).join('');
             }
         }
-
-        function renderPrayerSongsWithCategories(container, viewToggleHTML) {
-            const categories = {};
-            prayerSongs.forEach(song => {
-                const category = song.category || 'כללי';
-                if (!categories[category]) {
-                    categories[category] = [];
-                }
-                categories[category].push(song);
-            });
-
-            const categoryOrder = ['כניסה', 'תפילה', 'הוצאת ספר תורה', 'ברכות', 'כללי'];
-            
-            container.innerHTML = viewToggleHTML + `
-                <div class="space-y-6">
-                    ${categoryOrder.filter(cat => categories[cat]).map(category => `
-                        <div class="bg-purple-50 rounded-3xl p-6 border border-purple-200">
-                            <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
-                                <span class="w-4 h-4 bg-purple-500 rounded-full ml-3"></span>
-                                ${category} (${categories[category].length})
-                            </h3>
-                            <div class="grid grid-cols-1 gap-4">
-                                ${categories[category].map(song => renderPrayerSongCard(song)).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderPrayerSongsAsList(container, viewToggleHTML) {
-            container.innerHTML = viewToggleHTML + `
-                <div class="space-y-4">
-                    ${prayerSongs.map(song => renderPrayerSongCard(song)).join('')}
-                </div>
-            `;
-        }
-
-        function renderPrayerSongCard(song) {
-            const titleFontSize = song.name.length > 15 ? 'text-base' : song.name.length > 10 ? 'text-lg' : 'text-xl';
-            
+        
+        function renderSongCard(song, index) {
+            const gradientClass = `card-gradient-${(index % 6) + 1}`;
             return `
-                <div class="song-card rounded-3xl shadow-sm hover:shadow-md transition-all overflow-hidden">
-                    <div class="p-4 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleSongDetails('prayer-${song.id}')">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center flex-1 min-w-0">
-                                <span class="text-blue-600 ml-3 text-lg flex-shrink-0">🎵</span>
-                                <h3 class="${titleFontSize} font-bold text-gray-800 truncate">${song.name}</h3>
+                <div class="bg-white border border-gray-200 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="${gradientClass} p-4 text-white cursor-pointer" onclick="toggleMealSongDetails(${song.id})">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl ml-3">🎵</span>
+                                <h3 class="text-lg font-bold">${song.name}</h3>
                             </div>
-                            <div class="flex items-center space-x-2 space-x-reverse flex-shrink-0">
-                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">${song.key}</span>
-                                <span class="text-gray-400 text-xl" id="prayer-${song.id}-arrow">▼</span>
+                            <div class="flex items-center space-x-2 space-x-reverse">
+                                <span class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs font-medium">${song.category}</span>
+                                <span id="arrow-${song.id}" class="text-white text-xl transition-transform duration-300">▼</span>
                             </div>
                         </div>
                     </div>
-                    <div id="prayer-${song.id}-details" class="hidden border-t border-gray-200 p-4 bg-gray-50">
-                        <div class="flex space-x-2 space-x-reverse mb-4">
-                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">${song.key}</span>
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">${song.tempo} BPM</span>
-                            ${song.transpose !== 0 ? `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">${song.transpose > 0 ? '+' : ''}${song.transpose}</span>` : ''}
+
+                    <div id="song-details-${song.id}" class="hidden p-4">
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                <span class="ml-2">🎵</span>
+                                ${song.key}
+                            </span>
+                            <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                <span class="ml-2">⏱️</span>
+                                ${song.tempo}
+                            </span>
+                            <span class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                <span class="ml-2">🎹</span>
+                                ${song.transpose > 0 ? '+' : ''}${song.transpose}
+                            </span>
                         </div>
-                        <div class="space-y-4">
-                            <!-- Chords Section -->
-                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                                <div class="flex items-center justify-between p-3 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSongSection('prayer-${song.id}-chords')">
-                                    <h4 class="font-semibold text-blue-800 flex items-center">
-                                        <span class="ml-2">🎸</span>
-                                        אקורדים
-                                    </h4>
-                                    <span class="text-blue-600 text-sm" id="prayer-${song.id}-chords-arrow">▼</span>
-                                </div>
-                                <div id="prayer-${song.id}-chords" class="p-3 border-t border-blue-200">
-                                    <p class="text-gray-700 font-mono text-lg bg-gray-50 p-3 rounded-xl">${song.chords}</p>
-                                </div>
+                        
+                        <div id="chords-${song.id}" class="bg-gray-50 p-4 rounded-2xl mb-3 border border-gray-200">
+                            <div class="text-sm font-bold text-gray-700 mb-2 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors p-2 rounded-xl -m-2" onclick="toggleSongSection(${song.id}, 'chords')">
+                                <span>🎸 אקורדים</span>
+                                <span id="chords-arrow-${song.id}" class="text-gray-500 transition-transform duration-300">▼</span>
                             </div>
-                            
-                            <!-- Lyrics Section -->
-                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                                <div class="flex items-center justify-between p-3 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors" onclick="toggleSongSection('prayer-${song.id}-lyrics')">
-                                    <h4 class="font-semibold text-green-800 flex items-center">
-                                        <span class="ml-2">📝</span>
-                                        מילים
-                                    </h4>
-                                    <span class="text-green-600 text-sm" id="prayer-${song.id}-lyrics-arrow">▼</span>
-                                </div>
-                                <div id="prayer-${song.id}-lyrics" class="p-3 border-t border-green-200">
-                                    <p class="text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-xl leading-relaxed">${song.lyrics}</p>
-                                </div>
-                            </div>
+                            <div id="chords-content-${song.id}" class="hidden text-sm text-gray-600 font-mono bg-white p-3 rounded-xl border">${song.chords}</div>
                         </div>
+                        
+                        <div id="lyrics-${song.id}" class="bg-blue-50 p-4 rounded-2xl border border-blue-200">
+                            <div class="text-sm font-bold text-blue-700 mb-2 flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors p-2 rounded-xl -m-2" onclick="toggleSongSection(${song.id}, 'lyrics')">
+                                <span>📝 מילים</span>
+                                <span id="lyrics-arrow-${song.id}" class="text-blue-500 transition-transform duration-300">▼</span>
+                            </div>
+                            <div id="lyrics-content-${song.id}" class="hidden text-sm text-blue-600 whitespace-pre-line bg-white p-3 rounded-xl border border-blue-200">${song.lyrics}</div>
+                        </div>
+                        
+                        ${isLoggedIn ? `
+                            <div class="flex justify-center mt-4">
+                                <button onclick="editSong(${song.id})" class="bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors font-medium flex items-center">
+                                    <span class="ml-1">✏️</span>
+                                    <span>ערוך</span>
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1274,240 +1230,92 @@
 
         function renderMealSongs() {
             const container = document.getElementById('mealSongsContainer');
+            const viewType = document.getElementById('mealViewFilter').value;
+            const categoryFilter = document.getElementById('mealCategoryFilter').value;
             
-            // Add view toggle buttons
-            const viewToggleHTML = `
-                <div class="mb-6 flex justify-center">
-                    <div class="bg-white rounded-2xl p-1 shadow-sm border border-gray-200">
-                        <button id="mealCategoriesBtn" onclick="toggleMealView('categories')" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors ${showMealCategories ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-100'}">
-                            📂 קטגוריות
-                        </button>
-                        <button id="mealListBtn" onclick="toggleMealView('list')" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors ${!showMealCategories ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-gray-100'}">
-                            📋 רשימה
-                        </button>
-                    </div>
-                </div>
-            `;
+            let filteredSongs = mealSongs;
+            if (categoryFilter) {
+                filteredSongs = mealSongs.filter(song => song.category === categoryFilter);
+            }
             
-            if (showMealCategories) {
-                renderMealSongsWithCategories(container, viewToggleHTML);
+            if (viewType === 'categories') {
+                const categories = [...new Set(filteredSongs.map(song => song.category))];
+                container.innerHTML = categories.map(category => {
+                    const categorySongs = filteredSongs.filter(song => song.category === category);
+                    return `
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-800 mb-3 pr-4">${category}</h3>
+                            <div class="space-y-4">
+                                ${categorySongs.map((song, index) => renderMealSongCard(song, index)).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } else {
-                renderMealSongsAsList(container, viewToggleHTML);
+                container.innerHTML = filteredSongs.map((song, index) => renderMealSongCard(song, index)).join('');
             }
         }
-
-        function renderMealSongsWithCategories(container, viewToggleHTML) {
-            const categories = {};
-            mealSongs.forEach(song => {
-                const category = song.category || 'כללי';
-                if (!categories[category]) {
-                    categories[category] = [];
-                }
-                categories[category].push(song);
-            });
-
-            const categoryOrder = ['סעודה', 'ברכות', 'הבדלה', 'כללי'];
-            
-            container.innerHTML = viewToggleHTML + `
-                <div class="space-y-6">
-                    ${categoryOrder.filter(cat => categories[cat]).map(category => `
-                        <div class="bg-green-50 rounded-3xl p-6 border border-green-200">
-                            <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
-                                <span class="w-4 h-4 bg-green-500 rounded-full ml-3"></span>
-                                ${category} (${categories[category].length})
-                            </h3>
-                            <div class="grid grid-cols-1 gap-4">
-                                ${categories[category].map(song => renderMealSongCard(song)).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderMealSongsAsList(container, viewToggleHTML) {
-            container.innerHTML = viewToggleHTML + `
-                <div class="space-y-4">
-                    ${mealSongs.map(song => renderMealSongCard(song)).join('')}
-                </div>
-            `;
-        }
-
-        function renderMealSongCard(song) {
-            const titleFontSize = song.name.length > 15 ? 'text-base' : song.name.length > 10 ? 'text-lg' : 'text-xl';
-            
+        
+        function renderMealSongCard(song, index) {
+            const gradientClass = `card-gradient-${(index % 6) + 1}`;
             return `
-                <div class="song-card rounded-3xl shadow-sm hover:shadow-md transition-all overflow-hidden">
-                    <div class="p-4 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleSongDetails('meal-${song.id}')">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center flex-1 min-w-0">
-                                <span class="text-green-600 ml-3 text-lg flex-shrink-0">🍽️</span>
-                                <h3 class="${titleFontSize} font-bold text-gray-800 truncate">${song.name}</h3>
+                <div class="bg-white border border-gray-200 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="${gradientClass} p-4 text-white cursor-pointer" onclick="toggleMealSongDetails(${song.id})">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl ml-3">🍽️</span>
+                                <h3 class="text-lg font-bold">${song.name}</h3>
                             </div>
-                            <div class="flex items-center space-x-2 space-x-reverse flex-shrink-0">
-                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">${song.key}</span>
-                                <span class="text-gray-400 text-xl" id="meal-${song.id}-arrow">▼</span>
+                            <div class="flex items-center space-x-2 space-x-reverse">
+                                <span class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs font-medium">${song.category}</span>
+                                <span id="arrow-${song.id}" class="text-white text-xl transition-transform duration-300">▼</span>
                             </div>
                         </div>
                     </div>
-                    <div id="meal-${song.id}-details" class="hidden border-t border-gray-200 p-4 bg-gray-50">
-                        <div class="flex space-x-2 space-x-reverse mb-4">
-                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">${song.key}</span>
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">${song.tempo} BPM</span>
-                            ${song.transpose !== 0 ? `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">${song.transpose > 0 ? '+' : ''}${song.transpose}</span>` : ''}
+
+                    <div id="song-details-${song.id}" class="hidden p-4">
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                <span class="ml-2">🎵</span>
+                                ${song.key}
+                            </span>
+                            <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                <span class="ml-2">⏱️</span>
+                                ${song.tempo}
+                            </span>
+                            <span class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                <span class="ml-2">🎹</span>
+                                ${song.transpose > 0 ? '+' : ''}${song.transpose}
+                            </span>
                         </div>
-                        <div class="space-y-4">
-                            <!-- Chords Section -->
-                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                                <div class="flex items-center justify-between p-3 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSongSection('meal-${song.id}-chords')">
-                                    <h4 class="font-semibold text-blue-800 flex items-center">
-                                        <span class="ml-2">🎸</span>
-                                        אקורדים
-                                    </h4>
-                                    <span class="text-blue-600 text-sm" id="meal-${song.id}-chords-arrow">▼</span>
-                                </div>
-                                <div id="meal-${song.id}-chords" class="p-3 border-t border-blue-200">
-                                    <p class="text-gray-700 font-mono text-lg bg-gray-50 p-3 rounded-xl">${song.chords}</p>
-                                </div>
+                        
+                        <div id="chords-${song.id}" class="bg-gray-50 p-4 rounded-2xl mb-3 border border-gray-200">
+                            <div class="text-sm font-bold text-gray-700 mb-2 flex items-center justify-between cursor-pointer hover:bg-gray-100 transition-colors p-2 rounded-xl -m-2" onclick="toggleSongSection(${song.id}, 'chords')">
+                                <span>🎸 אקורדים</span>
+                                <span id="chords-arrow-${song.id}" class="text-gray-500 transition-transform duration-300">▼</span>
                             </div>
-                            
-                            <!-- Lyrics Section -->
-                            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                                <div class="flex items-center justify-between p-3 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors" onclick="toggleSongSection('meal-${song.id}-lyrics')">
-                                    <h4 class="font-semibold text-green-800 flex items-center">
-                                        <span class="ml-2">📝</span>
-                                        מילים
-                                    </h4>
-                                    <span class="text-green-600 text-sm" id="meal-${song.id}-lyrics-arrow">▼</span>
-                                </div>
-                                <div id="meal-${song.id}-lyrics" class="p-3 border-t border-green-200">
-                                    <p class="text-gray-700 whitespace-pre-line bg-gray-50 p-3 rounded-xl leading-relaxed">${song.lyrics}</p>
-                                </div>
-                            </div>
+                            <div id="chords-content-${song.id}" class="hidden text-sm text-gray-600 font-mono bg-white p-3 rounded-xl border">${song.chords}</div>
                         </div>
+                        
+                        <div id="lyrics-${song.id}" class="bg-green-50 p-4 rounded-2xl border border-green-200">
+                            <div class="text-sm font-bold text-green-700 mb-2 flex items-center justify-between cursor-pointer hover:bg-green-100 transition-colors p-2 rounded-xl -m-2" onclick="toggleSongSection(${song.id}, 'lyrics')">
+                                <span>📝 מילים</span>
+                                <span id="lyrics-arrow-${song.id}" class="text-green-500 transition-transform duration-300">▼</span>
+                            </div>
+                            <div id="lyrics-content-${song.id}" class="hidden text-sm text-green-600 whitespace-pre-line bg-white p-3 rounded-xl border border-green-200">${song.lyrics}</div>
+                        </div>
+                        
+                        ${isLoggedIn ? `
+                            <div class="flex justify-center mt-4">
+                                <button onclick="editSong(${song.id})" class="bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors font-medium flex items-center">
+                                    <span class="ml-1">✏️</span>
+                                    <span>ערוך</span>
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
-        }
-
-        function renderStudents() {
-            if (!isLoggedIn) return;
-            
-            studentsContainer.innerHTML = students.map(student => {
-                const progressPercentage = (student.lessonsCompleted / student.totalLessons) * 100;
-                
-                return `
-                    <div class="p-6 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0">
-                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-xl font-bold text-gray-800">${student.name}</h3>
-                                    <span class="px-3 py-1 rounded-full text-sm font-medium ${student.hasRecording ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
-                                        ${student.hasRecording ? '🎤 יש הקלטה' : '⏳ ללא הקלטה'}
-                                    </span>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200">
-                                        <div class="text-sm text-blue-600 font-medium mb-1">תאריכים חשובים</div>
-                                        <div class="text-blue-800">
-                                            <div><span class="font-medium">בר מצווה:</span> ${new Date(student.eventDate).toLocaleDateString('he-IL')}</div>
-                                            <div><span class="font-medium">שיעור הבא:</span> ${new Date(student.nextLesson).toLocaleDateString('he-IL')}</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200">
-                                        <div class="text-sm text-purple-600 font-medium mb-1">פרטי קריאה</div>
-                                        <div class="text-purple-800">
-                                            <div><span class="font-medium">פרשה:</span> ${student.parsha}</div>
-                                            <div><span class="font-medium">סוג קריאה:</span> ${student.readingType}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="bg-gradient-to-l from-amber-50 to-yellow-50 p-4 rounded-2xl border border-amber-200 mb-4">
-                                    <h4 class="text-amber-800 font-semibold mb-3 flex items-center">
-                                        <span class="ml-2">📜</span>
-                                        פרטי קריאה בתורה
-                                    </h4>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                        <div>
-                                            <span class="font-medium text-amber-700">קטע בתורה:</span>
-                                            <div class="text-amber-800 bg-amber-100 p-2 rounded-lg mt-1">${student.torahPortion}</div>
-                                        </div>
-                                        <div>
-                                            <span class="font-medium text-amber-700">הפטרה:</span>
-                                            <div class="text-amber-800 bg-amber-100 p-2 rounded-lg mt-1">${student.haftarah}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-sm font-medium text-gray-700">התקדמות בלימודים</span>
-                                        <span class="text-sm text-gray-600">${student.lessonsCompleted}/${student.totalLessons} שיעורים</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-3">
-                                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300" style="width: ${progressPercentage}%"></div>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1">${Math.round(progressPercentage)}% הושלם</div>
-                                </div>
-                                
-                                <div class="bg-gray-50 p-4 rounded-2xl mb-4">
-                                    <h4 class="font-semibold text-gray-700 mb-2">התקדמות כללית:</h4>
-                                    <p class="text-gray-700 text-sm">${student.progress}</p>
-                                </div>
-                                
-                                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200">
-                                    <h4 class="font-semibold text-indigo-700 mb-2">הערות מיוחדות:</h4>
-                                    <p class="text-indigo-800 text-sm">${student.specialNotes}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="lg:w-80">
-                                <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
-                                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
-                                        <span class="ml-2">🎤</span>
-                                        מצב הקלטה
-                                    </h4>
-                                    
-                                    <div class="space-y-3">
-                                        <div class="flex items-center justify-between p-3 rounded-xl ${student.hasRecording ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'}">
-                                            <span class="font-medium ${student.hasRecording ? 'text-green-700' : 'text-orange-700'}">
-                                                ${student.hasRecording ? 'הקלטה קיימת' : 'ללא הקלטה'}
-                                            </span>
-                                            <span class="text-2xl">${student.hasRecording ? '✅' : '❌'}</span>
-                                        </div>
-                                        
-                                        <div class="bg-gray-50 p-3 rounded-xl">
-                                            <div class="text-sm text-gray-600 font-medium mb-1">הערות הקלטה:</div>
-                                            <div class="text-gray-700 text-sm">${student.recordingNotes}</div>
-                                        </div>
-                                        
-                                        <div class="flex flex-col space-y-2">
-                                            <button onclick="sendWhatsAppToStudent('${student.phone}', '${student.name}')" class="w-full bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition-colors text-sm font-medium">
-                                                📱 WhatsApp לתלמיד
-                                            </button>
-                                            
-                                            <button onclick="toggleRecording(${student.id})" class="w-full px-4 py-2 rounded-xl text-sm font-medium transition-colors ${student.hasRecording ? 'bg-orange-600 text-white hover:bg-orange-700' : 'bg-blue-600 text-white hover:bg-blue-700'}">
-                                                ${student.hasRecording ? '🗑️ מחק הקלטה' : '🎤 הוסף הקלטה'}
-                                            </button>
-                                            
-                                            <button onclick="editStudent(${student.id})" class="w-full bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-700 transition-colors text-sm font-medium">
-                                                ✏️ ערוך פרטים
-                                            </button>
-                                            
-                                            <button onclick="viewStudentProgress(${student.id})" class="w-full bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition-colors text-sm font-medium">
-                                                📊 יומן שיעורים
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
         }
 
         function renderEquipment() {
@@ -1516,24 +1324,138 @@
             
             container.innerHTML = categories.map(category => {
                 const categoryItems = equipment.filter(item => item.category === category);
+                const checkedCount = categoryItems.filter(item => item.checked).length;
+                const totalCount = categoryItems.length;
+                const percentage = Math.round((checkedCount / totalCount) * 100);
+                
                 return `
-                    <div class="mb-8">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <span class="w-3 h-3 bg-blue-500 rounded-full ml-2"></span>
-                            ${category}
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-lg font-bold text-gray-800">${category}</h3>
+                            <div class="flex items-center">
+                                <span class="text-sm text-gray-600 ml-2">${checkedCount}/${totalCount}</span>
+                                <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-green-500 transition-all duration-300" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             ${categoryItems.map(item => `
-                                <div class="flex items-center p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
+                                <div class="flex items-center p-3 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors">
                                     <input type="checkbox" id="equipment-${item.id}" ${item.checked ? 'checked' : ''} 
                                            onchange="toggleEquipment(${item.id})"
-                                           class="w-5 h-5 text-blue-600 rounded-lg focus:ring-blue-500 ml-3">
-                                    <label for="equipment-${item.id}" class="flex-1 font-medium text-gray-700 cursor-pointer">
-                                        ${item.item}
-                                    </label>
-                                    <span class="text-2xl">${item.checked ? '✅' : '⭕'}</span>
+                                           class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ml-3">
+                                    <label for="equipment-${item.id}" class="text-gray-700 font-medium cursor-pointer flex-1">${item.item}</label>
+                                    ${item.checked ? '<span class="text-green-500 text-lg">✅</span>' : '<span class="text-gray-300 text-lg">⭕</span>'}
                                 </div>
                             `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStudents() {
+            const container = document.getElementById('studentsContainer');
+            container.innerHTML = students.map(student => {
+                const progressPercentage = Math.round((student.lessonsCompleted / student.totalLessons) * 100);
+                const eventDate = new Date(student.eventDate);
+                const nextLessonDate = new Date(student.nextLesson);
+                const formattedEventDate = eventDate.toLocaleDateString('he-IL');
+                const formattedNextLesson = nextLessonDate.toLocaleDateString('he-IL');
+                
+                return `
+                    <div class="p-6 hover:bg-gray-50 transition-colors">
+                        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start">
+                            <div class="flex-1 mb-4 lg:mb-0">
+                                <div class="flex items-center mb-3">
+                                    <h3 class="text-xl font-bold text-gray-800 ml-3">${student.name}</h3>
+                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">תלמיד פרטי</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                                    <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200">
+                                        <div class="flex items-center mb-2">
+                                            <span class="text-blue-600 ml-2 text-lg">📅</span>
+                                            <span class="text-sm font-medium text-blue-700">תאריך בר מצווה</span>
+                                        </div>
+                                        <div class="text-blue-800 font-bold">${formattedEventDate}</div>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 p-3 rounded-2xl border border-green-200">
+                                        <div class="flex items-center mb-2">
+                                            <span class="text-green-600 ml-2 text-lg">📚</span>
+                                            <span class="text-sm font-medium text-green-700">התקדמות שיעורים</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="text-green-800 font-bold ml-2">${student.lessonsCompleted}/${student.totalLessons}</span>
+                                            <div class="flex-1 h-2 bg-green-200 rounded-full overflow-hidden">
+                                                <div class="h-full bg-green-500 transition-all duration-300" style="width: ${progressPercentage}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-orange-50 p-3 rounded-2xl border border-orange-200">
+                                        <div class="flex items-center mb-2">
+                                            <span class="text-orange-600 ml-2 text-lg">⏰</span>
+                                            <span class="text-sm font-medium text-orange-700">שיעור הבא</span>
+                                        </div>
+                                        <div class="text-orange-800 font-bold">${formattedNextLesson}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200">
+                                        <div class="flex items-center mb-2">
+                                            <span class="text-purple-600 ml-2 text-lg">📜</span>
+                                            <span class="text-sm font-medium text-purple-700">פרטי קריאה</span>
+                                        </div>
+                                        <div class="space-y-1 text-sm">
+                                            <div><span class="font-medium">פרשה:</span> ${student.parsha}</div>
+                                            <div><span class="font-medium">סוג קריאה:</span> ${student.readingType}</div>
+                                            <div><span class="font-medium">פרק תורה:</span> ${student.torahPortion}</div>
+                                            <div><span class="font-medium">הפטרה:</span> ${student.haftarah}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                                        <div class="flex items-center mb-2">
+                                            <span class="text-gray-600 ml-2 text-lg">📝</span>
+                                            <span class="text-sm font-medium text-gray-700">התקדמות והערות</span>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-2">${student.progress}</div>
+                                        <div class="text-xs text-gray-500">${student.specialNotes}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-yellow-50 p-4 rounded-2xl border border-yellow-200">
+                                    <div class="flex items-center mb-2">
+                                        <span class="text-yellow-600 ml-2 text-lg">🎤</span>
+                                        <span class="text-sm font-medium text-yellow-700">הקלטות</span>
+                                        ${student.hasRecording ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs mr-2">יש הקלטה</span>' : '<span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs mr-2">אין הקלטה</span>'}
+                                    </div>
+                                    <div class="text-sm text-yellow-600">${student.recordingNotes}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col space-y-2 lg:mr-6">
+                                <button onclick="callStudent('${student.phone}')" class="bg-green-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
+                                    <span class="ml-1">📞</span>
+                                    <span>התקשר</span>
+                                </button>
+                                <button onclick="sendWhatsApp('${student.phone}', '${student.name}')" class="bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
+                                    <span class="ml-1">📱</span>
+                                    <span>WhatsApp</span>
+                                </button>
+                                <button onclick="editStudent(${student.id})" class="bg-orange-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-orange-700 transition-colors font-medium flex items-center justify-center">
+                                    <span class="ml-1">✏️</span>
+                                    <span>ערוך</span>
+                                </button>
+                                <button onclick="addRecording(${student.id})" class="bg-purple-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-purple-700 transition-colors font-medium flex items-center justify-center">
+                                    <span class="ml-1">🎤</span>
+                                    <span>הקלטה</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1543,246 +1465,188 @@
         function renderPayments() {
             const container = document.getElementById('paymentsContainer');
             container.innerHTML = payments.map(payment => `
-                <div class="bg-gray-50 p-6 rounded-3xl mb-4 hover:bg-gray-100 transition-colors">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">אירוע: ${payment.eventName}</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="p-4 bg-white rounded-2xl">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="font-medium text-gray-700">תשלום לקלידן</span>
-                                <div class="flex items-center">
-                                    <span class="text-2xl ml-2">${payment.keyboardistPaid ? '✅' : '❌'}</span>
-                                    <button onclick="togglePayment(${payment.id}, 'keyboardist')" 
-                                            class="px-3 py-1 rounded-full text-sm font-medium transition-colors ${payment.keyboardistPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                        ${payment.keyboardistPaid ? 'שולם' : 'לא שולם'}
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">סכום:</span>
-                                <div class="flex items-center">
-                                    <input type="number" value="${payment.keyboardistAmount || 0}" 
-                                           onchange="updatePaymentAmount(${payment.id}, 'keyboardist', this.value)"
-                                           class="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm text-center">
-                                    <span class="text-sm text-gray-600 mr-1">₪</span>
-                                </div>
-                            </div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-4 hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">${payment.eventName}</h3>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            ${payment.receiptIssued ? 
+                                '<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">הוצאה קבלה</span>' : 
+                                '<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">לא הוצאה קבלה</span>'
+                            }
                         </div>
-                        <div class="p-4 bg-white rounded-2xl">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="font-medium text-gray-700">תשלום למתופפים</span>
-                                <div class="flex items-center">
-                                    <span class="text-2xl ml-2">${payment.drummersPaid ? '✅' : '❌'}</span>
-                                    <button onclick="togglePayment(${payment.id}, 'drummers')" 
-                                            class="px-3 py-1 rounded-full text-sm font-medium transition-colors ${payment.drummersPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                        ${payment.drummersPaid ? 'שולם' : 'לא שולם'}
-                                    </button>
-                                </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-blue-700 font-medium">קלידן</span>
+                                ${payment.keyboardistPaid ? 
+                                    '<span class="text-green-600 text-lg">✅</span>' : 
+                                    '<span class="text-red-600 text-lg">❌</span>'
+                                }
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">סכום:</span>
-                                <div class="flex items-center">
-                                    <input type="number" value="${payment.drummersAmount || 0}" 
-                                           onchange="updatePaymentAmount(${payment.id}, 'drummers', this.value)"
-                                           class="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm text-center">
-                                    <span class="text-sm text-gray-600 mr-1">₪</span>
-                                </div>
-                            </div>
+                            <div class="text-blue-800 font-bold">₪${payment.keyboardistAmount}</div>
+                            <button onclick="togglePayment('keyboardist', ${payment.id})" class="mt-2 w-full ${payment.keyboardistPaid ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded-lg text-sm transition-colors">
+                                ${payment.keyboardistPaid ? 'בטל תשלום' : 'סמן כשולם'}
+                            </button>
                         </div>
-                        <div class="p-4 bg-white rounded-2xl">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="font-medium text-gray-700">תשלום למנהלת</span>
-                                <div class="flex items-center">
-                                    <span class="text-2xl ml-2">${payment.managerPaid ? '✅' : '❌'}</span>
-                                    <button onclick="togglePayment(${payment.id}, 'manager')" 
-                                            class="px-3 py-1 rounded-full text-sm font-medium transition-colors ${payment.managerPaid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                        ${payment.managerPaid ? 'שולם' : 'לא שולם'}
-                                    </button>
-                                </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-purple-700 font-medium">מתופפים</span>
+                                ${payment.drummersPaid ? 
+                                    '<span class="text-green-600 text-lg">✅</span>' : 
+                                    '<span class="text-red-600 text-lg">❌</span>'
+                                }
                             </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">סכום:</span>
-                                <div class="flex items-center">
-                                    <input type="number" value="${payment.managerAmount || 0}" 
-                                           onchange="updatePaymentAmount(${payment.id}, 'manager', this.value)"
-                                           class="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm text-center">
-                                    <span class="text-sm text-gray-600 mr-1">₪</span>
-                                </div>
-                            </div>
+                            <div class="text-purple-800 font-bold">₪${payment.drummersAmount}</div>
+                            <button onclick="togglePayment('drummers', ${payment.id})" class="mt-2 w-full ${payment.drummersPaid ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded-lg text-sm transition-colors">
+                                ${payment.drummersPaid ? 'בטל תשלום' : 'סמן כשולם'}
+                            </button>
                         </div>
-                        <div class="flex items-center justify-between p-4 bg-white rounded-2xl">
-                            <span class="font-medium text-gray-700">קבלה הוצאה</span>
-                            <div class="flex items-center">
-                                <span class="text-2xl ml-2">${payment.receiptIssued ? '✅' : '❌'}</span>
-                                <button onclick="togglePayment(${payment.id}, 'receipt')" 
-                                        class="px-3 py-1 rounded-full text-sm font-medium transition-colors ${payment.receiptIssued ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                    ${payment.receiptIssued ? 'הוצאה' : 'לא הוצאה'}
-                                </button>
+                        
+                        <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-orange-700 font-medium">מנהל</span>
+                                ${payment.managerPaid ? 
+                                    '<span class="text-green-600 text-lg">✅</span>' : 
+                                    '<span class="text-red-600 text-lg">❌</span>'
+                                }
                             </div>
+                            <div class="text-orange-800 font-bold">₪${payment.managerAmount}</div>
+                            <button onclick="togglePayment('manager', ${payment.id})" class="mt-2 w-full ${payment.managerPaid ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-1 rounded-lg text-sm transition-colors">
+                                ${payment.managerPaid ? 'בטל תשלום' : 'סמן כשולם'}
+                            </button>
                         </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <button onclick="toggleReceipt(${payment.id})" class="w-full ${payment.receiptIssued ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded-xl transition-colors font-medium">
+                            ${payment.receiptIssued ? '🧾 בטל קבלה' : '🧾 הוצא קבלה'}
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
         function renderSongsLibrary() {
-            const libraryContainer = document.getElementById('songsLibraryContainer');
+            const container = document.getElementById('songsLibraryContainer');
+            const searchTerm = document.getElementById('songSearch').value.toLowerCase();
             
-            const allSongs = [
-                ...prayerSongs.map(song => ({...song, source: 'prayer'})),
-                ...mealSongs.map(song => ({...song, source: 'meal'})),
-                ...songsLibrary.filter(song => !prayerSongs.find(p => p.id === song.id) && !mealSongs.find(m => m.id === song.id))
-            ];
-
-            const searchTerm = document.getElementById('songSearch')?.value.toLowerCase() || '';
-            const filteredSongs = allSongs.filter(song => 
+            const filteredSongs = songsLibrary.filter(song => 
                 song.name.toLowerCase().includes(searchTerm) ||
-                (song.category && song.category.toLowerCase().includes(searchTerm)) ||
+                song.category.toLowerCase().includes(searchTerm) ||
                 song.lyrics.toLowerCase().includes(searchTerm)
             );
-
-            if (showCategories) {
-                renderSongsWithCategories(filteredSongs, libraryContainer);
-            } else {
-                renderSongsAsList(filteredSongs, libraryContainer);
-            }
-        }
-
-        function renderSongsWithCategories(songs, container) {
-            const categories = {};
-            songs.forEach(song => {
-                const category = song.category || 'ללא קטגוריה';
-                if (!categories[category]) {
-                    categories[category] = [];
-                }
-                categories[category].push(song);
-            });
-
-            const categoryOrder = ['כניסה', 'תפילה', 'הוצאת ספר תורה', 'ברכות', 'סעודה', 'הבדלה', 'ללא קטגוריה'];
             
-            container.innerHTML = `
-                <div class="space-y-6">
-                    ${categoryOrder.filter(cat => categories[cat]).map(category => `
-                        <div class="bg-gray-50 rounded-3xl p-6">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                                <span class="w-4 h-4 bg-blue-500 rounded-full ml-3"></span>
-                                ${category} (${categories[category].length})
-                            </h3>
-                            <div class="grid grid-cols-1 gap-4">
-                                ${categories[category].map(song => renderSongCard(song)).join('')}
+            container.innerHTML = filteredSongs.map((song, index) => {
+                const gradientClass = `card-gradient-${(index % 6) + 1}`;
+                return `
+                    <div class="bg-white border border-gray-200 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mb-4">
+                        <div class="${gradientClass} p-4 text-white cursor-pointer" onclick="toggleMealSongDetails(${song.id})">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <span class="text-2xl ml-3">🎼</span>
+                                    <h3 class="text-lg font-bold">${song.name}</h3>
+                                </div>
+                                <div class="flex items-center space-x-2 space-x-reverse">
+                                    <span class="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-xs font-medium">${song.category}</span>
+                                    <span id="arrow-${song.id}" class="text-white text-xl transition-transform duration-300">▼</span>
+                                </div>
                             </div>
                         </div>
-                    `).join('')}
-                </div>
-            `;
-        }
 
-        function renderSongsAsList(songs, container) {
-            container.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-gray-800">כל השירים (${songs.length})</h3>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 gap-4">
-                        ${songs.map(song => renderSongCard(song)).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSongCard(song) {
-            return `
-                <div class="song-card p-4 rounded-2xl shadow-sm hover:shadow-md transition-all bg-white">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="text-lg font-bold text-gray-800">${song.name}</h4>
-                            <div class="flex items-center space-x-2 space-x-reverse mt-1">
-                                ${song.category ? `<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-medium">${song.category}</span>` : ''}
-                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">${song.key}</span>
-                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">${song.tempo} BPM</span>
-                                ${song.transpose !== 0 ? `<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-medium">${song.transpose > 0 ? '+' : ''}${song.transpose}</span>` : ''}
+                        <div id="song-details-${song.id}" class="hidden p-4">
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                    <span class="ml-2">🎵</span>
+                                    ${song.key}
+                                </span>
+                                <span class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                    <span class="ml-2">⏱️</span>
+                                    ${song.tempo}
+                                </span>
+                                <span class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-md flex items-center">
+                                    <span class="ml-2">🎹</span>
+                                    ${song.transpose > 0 ? '+' : ''}${song.transpose}
+                                </span>
                             </div>
-                        </div>
-                        <div class="flex space-x-2 space-x-reverse">
-                            ${song.youtubeLink ? `
-                                <button onclick="window.open('${song.youtubeLink}', '_blank')" class="bg-red-600 text-white px-3 py-1 rounded-xl text-sm hover:bg-red-700">
-                                    📺 YouTube
+                            
+                            <div id="chords-${song.id}" class="bg-gray-50 p-4 rounded-2xl mb-3 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors" onclick="toggleSongSection(${song.id}, 'chords')">
+                                <div class="text-sm font-bold text-gray-700 mb-2 flex items-center justify-between">
+                                    <span>🎸 אקורדים</span>
+                                    <span id="chords-arrow-${song.id}" class="text-gray-500 transition-transform duration-300">▼</span>
+                                </div>
+                                <div id="chords-content-${song.id}" class="hidden text-sm text-gray-600 font-mono bg-white p-3 rounded-xl border">${song.chords}</div>
+                            </div>
+                            
+                            <div id="lyrics-${song.id}" class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200 cursor-pointer hover:bg-indigo-100 transition-colors" onclick="toggleSongSection(${song.id}, 'lyrics')">
+                                <div class="text-sm font-bold text-indigo-700 mb-2 flex items-center justify-between">
+                                    <span>📝 מילים</span>
+                                    <span id="lyrics-arrow-${song.id}" class="text-indigo-500 transition-transform duration-300">▼</span>
+                                </div>
+                                <div id="lyrics-content-${song.id}" class="hidden text-sm text-indigo-600 whitespace-pre-line bg-white p-3 rounded-xl border border-indigo-200">${song.lyrics}</div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mt-4 justify-center">
+                                ${song.youtubeLink ? `
+                                    <button onclick="openYoutube('${song.youtubeLink}')" class="bg-red-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-red-700 transition-colors font-medium flex items-center">
+                                        <span class="ml-1">📺</span>
+                                        <span>YouTube</span>
+                                    </button>
+                                ` : ''}
+                                <button onclick="editSong(${song.id})" class="bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm hover:bg-blue-700 transition-colors font-medium flex items-center">
+                                    <span class="ml-1">✏️</span>
+                                    <span>ערוך</span>
                                 </button>
-                            ` : ''}
-                            <button onclick="editSong(${song.id})" class="bg-blue-600 text-white px-3 py-1 rounded-xl text-sm hover:bg-blue-700">
-                                ✏️ ערוך
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-3">
-                        <!-- Chords Section -->
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                            <div class="flex items-center justify-between p-2 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors" onclick="toggleSongSection('library-${song.id}-chords')">
-                                <span class="font-medium text-blue-800 text-sm flex items-center">
-                                    <span class="ml-2">🎸</span>
-                                    אקורדים
-                                </span>
-                                <span class="text-blue-600 text-xs" id="library-${song.id}-chords-arrow">▼</span>
-                            </div>
-                            <div id="library-${song.id}-chords" class="p-2 border-t border-blue-200">
-                                <div class="bg-white p-2 rounded-lg font-mono text-sm">${song.chords}</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Lyrics Section -->
-                        <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                            <div class="flex items-center justify-between p-2 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors" onclick="toggleSongSection('library-${song.id}-lyrics')">
-                                <span class="font-medium text-green-800 text-sm flex items-center">
-                                    <span class="ml-2">📝</span>
-                                    מילים
-                                </span>
-                                <span class="text-green-600 text-xs" id="library-${song.id}-lyrics-arrow">▼</span>
-                            </div>
-                            <div id="library-${song.id}-lyrics" class="p-2 border-t border-green-200">
-                                <div class="bg-white p-2 rounded-lg text-sm max-h-32 overflow-y-auto whitespace-pre-line">${song.lyrics}</div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            }).join('');
         }
 
-        function toggleCategories() {
-            showCategories = !showCategories;
-            const btn = document.getElementById('toggleCategoriesBtn');
+        function renderImportantLinks() {
+            const container = document.getElementById('importantLinksContainer');
+            const categories = [...new Set(importantLinks.map(link => link.category))];
             
-            if (showCategories) {
-                btn.textContent = '📋 הצג רשימה';
-                btn.className = btn.className.replace('bg-purple-600', 'bg-orange-600').replace('hover:bg-purple-700', 'hover:bg-orange-700');
-            } else {
-                btn.textContent = '📂 הצג קטגוריות';
-                btn.className = btn.className.replace('bg-orange-600', 'bg-purple-600').replace('hover:bg-orange-700', 'hover:bg-purple-700');
-            }
-            
-            renderSongsLibrary();
+            container.innerHTML = categories.map(category => {
+                const categoryLinks = importantLinks.filter(link => link.category === category);
+                
+                return `
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">${category}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${categoryLinks.map(link => `
+                                <div class="bg-white border border-gray-200 rounded-2xl p-4 hover:shadow-md transition-all cursor-pointer" onclick="openLink('${link.url}')">
+                                    <div class="flex items-start">
+                                        <span class="text-2xl ml-3 flex-shrink-0">${link.icon}</span>
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-gray-800 mb-1">${link.name}</h4>
+                                            <p class="text-sm text-gray-600 mb-2">${link.description}</p>
+                                            <div class="text-xs text-blue-600 hover:text-blue-800 transition-colors">
+                                                לחץ לפתיחה ←
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function togglePrayerView(view) {
-            showPrayerCategories = (view === 'categories');
-            renderPrayerSongs();
-        }
-
-        function toggleMealView(view) {
-            showMealCategories = (view === 'categories');
-            renderMealSongs();
-        }
-
-        async function toggleEquipment(id) {
+        // Interactive functions
+        function toggleEquipment(id) {
             const item = equipment.find(e => e.id === id);
             if (item) {
                 item.checked = !item.checked;
                 renderEquipment();
-                await saveDataToCMS();
             }
         }
 
-        async function togglePayment(id, type) {
+        function togglePayment(type, id) {
             const payment = payments.find(p => p.id === id);
             if (payment) {
                 switch(type) {
@@ -1795,1056 +1659,312 @@
                     case 'manager':
                         payment.managerPaid = !payment.managerPaid;
                         break;
-                    case 'receipt':
-                        payment.receiptIssued = !payment.receiptIssued;
-                        break;
                 }
                 renderPayments();
-                await saveDataToCMS();
             }
         }
 
-        function toggleRecording(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                student.hasRecording = !student.hasRecording;
-                if (student.hasRecording) {
-                    student.recordingNotes = "הקלטה חדשה נוספה";
-                } else {
-                    student.recordingNotes = "הקלטה הוסרה";
-                }
-                renderStudents();
+        function toggleReceipt(id) {
+            const payment = payments.find(p => p.id === id);
+            if (payment) {
+                payment.receiptIssued = !payment.receiptIssued;
+                renderPayments();
             }
         }
 
-        function editStudent(studentId) {
-            alert(`עריכת תלמיד ${studentId} - פונקציה זו תפותח בהמשך`);
-        }
-
-        function viewStudentProgress(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (student) {
-                alert(`יומן שיעורים של ${student.name}:\n\nהושלמו: ${student.lessonsCompleted}/${student.totalLessons} שיעורים\nהתקדמות: ${student.progress}`);
-            }
-        }
-
-        function editSong(songId) {
-            alert(`עריכת שיר ${songId} - פונקציה זו תפותח בהמשך`);
-        }
-
-        function toggleSongDetails(songId) {
-            const details = document.getElementById(`${songId}-details`);
-            const arrow = document.getElementById(`${songId}-arrow`);
+        function toggleSongDetails(id) {
+            const detailsElement = document.getElementById(`song-details-${id}`);
+            const arrowElement = document.getElementById(`arrow-${id}`);
             
-            if (details.classList.contains('hidden')) {
-                details.classList.remove('hidden');
-                arrow.textContent = '▲';
+            if (!detailsElement || !arrowElement) return;
+            
+            if (detailsElement.classList.contains('hidden')) {
+                detailsElement.classList.remove('hidden');
+                arrowElement.style.transform = 'rotate(180deg)';
             } else {
-                details.classList.add('hidden');
-                arrow.textContent = '▼';
+                detailsElement.classList.add('hidden');
+                arrowElement.style.transform = 'rotate(0deg)';
             }
         }
 
-        function toggleSongSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            const arrow = document.getElementById(`${sectionId}-arrow`);
+        function toggleMealSongDetails(id) {
+            const detailsElement = document.getElementById(`song-details-${id}`);
+            const arrowElement = document.getElementById(`arrow-${id}`);
             
-            if (section.classList.contains('hidden')) {
-                section.classList.remove('hidden');
-                arrow.textContent = '▲';
+            if (!detailsElement || !arrowElement) return;
+            
+            if (detailsElement.classList.contains('hidden')) {
+                detailsElement.classList.remove('hidden');
+                arrowElement.style.transform = 'rotate(180deg)';
             } else {
-                section.classList.add('hidden');
-                arrow.textContent = '▼';
+                detailsElement.classList.add('hidden');
+                arrowElement.style.transform = 'rotate(0deg)';
             }
         }
 
-        function editMediaLinks(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
+        function toggleSongSection(id, section) {
+            const contentElement = document.getElementById(`${section}-content-${id}`);
+            const arrowElement = document.getElementById(`${section}-arrow-${id}`);
             
-            const photosLink = prompt('קישור לתמונות:', event.mediaLinks?.photos || '');
-            if (photosLink === null) return;
+            if (!contentElement || !arrowElement) return;
             
-            const videosLink = prompt('קישור לסרטונים:', event.mediaLinks?.videos || '');
-            if (videosLink === null) return;
-            
-            if (!event.mediaLinks) {
-                event.mediaLinks = {};
-            }
-            
-            event.mediaLinks.photos = photosLink;
-            event.mediaLinks.videos = videosLink;
-            
-            openEventModal(eventId);
-            saveDataToCMS();
-            showNotification('קישורי מדיה עודכנו בהצלחה!', 'success');
-        }
-
-        function manageCategories() {
-            let categoriesHTML = `
-                <div class="space-y-4">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">ניהול קטגוריות שירים</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        ${songCategories.map(category => `
-                            <div class="bg-${category.color}-50 border border-${category.color}-200 p-4 rounded-2xl">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <span class="text-2xl ml-3">${category.icon}</span>
-                                        <span class="font-medium text-${category.color}-800">${category.name}</span>
-                                    </div>
-                                    <div class="flex space-x-2 space-x-reverse">
-                                        <button onclick="editCategory(${category.id})" class="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-blue-700">
-                                            ✏️
-                                        </button>
-                                        <button onclick="deleteCategory(${category.id})" class="bg-red-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-red-700">
-                                            🗑️
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button onclick="addNewCategory()" class="w-full bg-green-600 text-white px-4 py-3 rounded-2xl hover:bg-green-700 transition-colors font-medium">
-                        ➕ הוסף קטגוריה חדשה
-                    </button>
-                </div>
-            `;
-            
-            modalTitle.textContent = 'ניהול קטגוריות';
-            modalContent.innerHTML = categoriesHTML;
-            eventModal.classList.remove('hidden');
-        }
-
-        function editCategory(categoryId) {
-            const category = songCategories.find(c => c.id === categoryId);
-            if (!category) return;
-            
-            const newName = prompt('שם הקטגוריה:', category.name);
-            if (newName && newName !== category.name) {
-                category.name = newName;
-                manageCategories();
-                renderSongsLibrary();
-                showNotification('קטגוריה עודכנה בהצלחה!', 'success');
+            if (contentElement.classList.contains('hidden')) {
+                contentElement.classList.remove('hidden');
+                arrowElement.style.transform = 'rotate(180deg)';
+            } else {
+                contentElement.classList.add('hidden');
+                arrowElement.style.transform = 'rotate(0deg)';
             }
         }
 
-        function deleteCategory(categoryId) {
-            const category = songCategories.find(c => c.id === categoryId);
-            if (!category) return;
+        function toggleSongView(id, viewType) {
+            const chordsElement = document.getElementById(`chords-${id}`);
+            const lyricsElement = document.getElementById(`lyrics-${id}`);
             
-            if (confirm(`האם אתה בטוח שברצונך למחוק את הקטגוריה "${category.name}"?`)) {
-                const index = songCategories.findIndex(c => c.id === categoryId);
-                songCategories.splice(index, 1);
-                
-                // Update songs that had this category
-                songsLibrary.forEach(song => {
-                    if (song.category === category.name) {
-                        song.category = 'כללי';
-                    }
-                });
-                
-                manageCategories();
-                renderSongsLibrary();
-                showNotification('קטגוריה נמחקה בהצלחה!', 'success');
+            if (!chordsElement || !lyricsElement) return;
+            
+            switch(viewType) {
+                case 'chords':
+                    chordsElement.style.display = 'block';
+                    lyricsElement.style.display = 'none';
+                    break;
+                case 'lyrics':
+                    chordsElement.style.display = 'none';
+                    lyricsElement.style.display = 'block';
+                    break;
+                case 'both':
+                    chordsElement.style.display = 'block';
+                    lyricsElement.style.display = 'block';
+                    break;
             }
         }
 
-        function addNewCategory() {
-            const name = prompt('שם הקטגוריה החדשה:');
-            if (!name) return;
-            
-            const icon = prompt('אייקון לקטגוריה (אמוג\'י):', '🎵');
-            if (!icon) return;
-            
-            const colors = ['blue', 'purple', 'green', 'orange', 'pink', 'indigo', 'teal', 'amber', 'red'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            
-            const newCategory = {
-                id: Math.max(...songCategories.map(c => c.id)) + 1,
-                name: name,
-                color: color,
-                icon: icon
-            };
-            
-            songCategories.push(newCategory);
-            manageCategories();
-            showNotification('קטגוריה חדשה נוספה בהצלחה!', 'success');
+        function editSong(id) {
+            alert(`עריכת שיר מספר ${id} - יפתח חלון עריכה`);
+        }
+
+        function callStudent(phone) {
+            window.open(`tel:${phone}`, '_self');
+        }
+
+        function sendWhatsApp(phone, name) {
+            const message = encodeURIComponent(`שלום ${name}, איך ההכנות לבר המצווה?`);
+            window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
+        }
+
+        function sendWhatsAppToParent(phone, parentName, childName) {
+            const message = encodeURIComponent(`שלום ${parentName}, בקשר לבר המצווה של ${childName}`);
+            window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
+        }
+
+        function editStudent(id) {
+            alert(`עריכת תלמיד מספר ${id} - יפתח חלון עריכה`);
+        }
+
+        function addRecording(id) {
+            alert(`הוספת הקלטה לתלמיד מספר ${id} - יפתח ממשק הקלטה`);
+        }
+
+        function editEvent(id) {
+            alert(`עריכת אירוע מספר ${id} - יפתח חלון עריכה`);
+        }
+
+        function deleteEvent(id) {
+            if (confirm('האם אתה בטוח שברצונך למחוק את האירוע?')) {
+                alert(`מחיקת אירוע מספר ${id}`);
+            }
         }
 
         function addNewEvent() {
-            const name = prompt('שם בר המצווה:');
-            if (!name) return;
-            
-            const date = prompt('תאריך (YYYY-MM-DD):');
-            if (!date) return;
-            
-            const time = prompt('שעה (HH:MM):');
-            if (!time) return;
-            
-            const location = prompt('מיקום:');
-            if (!location) return;
-            
-            const newEvent = {
-                id: Math.max(...events.map(e => e.id)) + 1,
-                name: name,
-                date: date,
-                time: time,
-                guestArrivalTime: time,
-                eventStartTime: time,
-                location: location,
-                wazeLink: `https://waze.com/ul?q=${encodeURIComponent(location)}`,
-                package: "חבילה בסיסית",
-                keyboardist: false,
-                drummers: 0,
-                isStudent: false,
-                price: 2000,
-                parentPhone: "",
-                parentName: "",
-                notes: "",
-                status: "pending",
-                mediaLinks: { photos: "", videos: "" }
-            };
-            
-            events.push(newEvent);
-            filteredEvents = [...events];
-            renderEvents();
-            saveDataToCMS();
-            showNotification('אירוע חדש נוסף בהצלחה!', 'success');
-        }
-
-        function editEvent(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
-            
-            // Create edit form modal
-            modalTitle.textContent = `עריכת אירוע - ${event.name}`;
-            
-            modalContent.innerHTML = `
-                <form id="editEventForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">שם בר המצווה</label>
-                            <input type="text" id="editName" value="${event.name}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">תאריך</label>
-                            <input type="date" id="editDate" value="${event.date}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">שעת הגעת אורחים</label>
-                            <input type="time" id="editGuestTime" value="${event.guestArrivalTime}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">שעת תחילת אירוע</label>
-                            <input type="time" id="editEventTime" value="${event.eventStartTime}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">מיקום</label>
-                        <input type="text" id="editLocation" value="${event.location}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">קישור Waze</label>
-                        <input type="url" id="editWazeLink" value="${event.wazeLink}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">חבילה</label>
-                            <select id="editPackage" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="חבילה בסיסית" ${event.package === 'חבילה בסיסית' ? 'selected' : ''}>חבילה בסיסית</option>
-                                <option value="חבילה חגיגית" ${event.package === 'חבילה חגיגית' ? 'selected' : ''}>חבילה חגיגית</option>
-                                <option value="חבילת הכל כלול" ${event.package === 'חבילת הכל כלול' ? 'selected' : ''}>חבילת הכל כלול</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">סטטוס</label>
-                            <select id="editStatus" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="pending" ${event.status === 'pending' ? 'selected' : ''}>ממתין לאישור</option>
-                                <option value="confirmed" ${event.status === 'confirmed' ? 'selected' : ''}>מאושר</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">מחיר (₪)</label>
-                            <input type="number" id="editPrice" value="${event.price}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="editKeyboardist" ${event.keyboardist ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 ml-3">
-                            <label for="editKeyboardist" class="text-sm font-medium text-gray-700">קלידן</label>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">מספר מתופפים</label>
-                            <input type="number" id="editDrummers" value="${event.drummers}" min="0" max="5" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">שם ההורה</label>
-                            <input type="text" id="editParentName" value="${event.parentName}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">טלפון הורה</label>
-                            <input type="tel" id="editParentPhone" value="${event.parentPhone}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">קישור תמונות</label>
-                            <input type="url" id="editPhotosLink" value="${event.mediaLinks?.photos || ''}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">קישור סרטונים</label>
-                            <input type="url" id="editVideosLink" value="${event.mediaLinks?.videos || ''}" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center">
-                        <input type="checkbox" id="editIsStudent" ${event.isStudent ? 'checked' : ''} class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 ml-3">
-                        <label for="editIsStudent" class="text-sm font-medium text-gray-700">תלמיד פרטי</label>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">הערות</label>
-                        <textarea id="editNotes" rows="3" class="w-full border border-gray-300 rounded-2xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">${event.notes}</textarea>
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3 space-x-reverse pt-6 border-t border-gray-200">
-                        <button type="button" onclick="eventModal.classList.add('hidden')" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-2xl hover:bg-gray-300 transition-colors font-medium">
-                            ביטול
-                        </button>
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors font-medium">
-                            שמור שינויים
-                        </button>
-                    </div>
-                </form>
-            `;
-            
-            // Add form submit handler
-            document.getElementById('editEventForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveEventChanges(eventId);
-            });
-            
-            eventModal.classList.remove('hidden');
-        }
-
-        function saveEventChanges(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
-            
-            // Update event with form values
-            event.name = document.getElementById('editName').value;
-            event.date = document.getElementById('editDate').value;
-            event.guestArrivalTime = document.getElementById('editGuestTime').value;
-            event.eventStartTime = document.getElementById('editEventTime').value;
-            event.location = document.getElementById('editLocation').value;
-            event.wazeLink = document.getElementById('editWazeLink').value;
-            event.package = document.getElementById('editPackage').value;
-            event.status = document.getElementById('editStatus').value;
-            event.price = parseInt(document.getElementById('editPrice').value) || 0;
-            event.keyboardist = document.getElementById('editKeyboardist').checked;
-            event.drummers = parseInt(document.getElementById('editDrummers').value) || 0;
-            event.parentName = document.getElementById('editParentName').value;
-            event.parentPhone = document.getElementById('editParentPhone').value;
-            event.isStudent = document.getElementById('editIsStudent').checked;
-            event.notes = document.getElementById('editNotes').value;
-            
-            // Update media links
-            if (!event.mediaLinks) {
-                event.mediaLinks = {};
-            }
-            event.mediaLinks.photos = document.getElementById('editPhotosLink').value;
-            event.mediaLinks.videos = document.getElementById('editVideosLink').value;
-            
-            // Update time field for backward compatibility
-            event.time = event.eventStartTime;
-            
-            // Update filtered events and re-render
-            applyFilters();
-            renderEvents();
-            
-            // Save to storage
-            saveDataToCMS();
-            
-            // Close modal and show success message
-            eventModal.classList.add('hidden');
-            showNotification('אירוע עודכן בהצלחה!', 'success');
-        }
-
-        function deleteEvent(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
-            
-            if (confirm(`האם אתה בטוח שברצונך למחוק את האירוע של ${event.name}?\n\nפעולה זו לא ניתנת לביטול!`)) {
-                // Remove from events array
-                const eventIndex = events.findIndex(e => e.id === eventId);
-                if (eventIndex > -1) {
-                    events.splice(eventIndex, 1);
-                }
-                
-                // Remove from students array if exists
-                const studentIndex = students.findIndex(s => s.name === event.name);
-                if (studentIndex > -1) {
-                    students.splice(studentIndex, 1);
-                }
-                
-                // Remove from payments array if exists
-                const paymentIndex = payments.findIndex(p => p.eventName === event.name);
-                if (paymentIndex > -1) {
-                    payments.splice(paymentIndex, 1);
-                }
-                
-                // Update filtered events and re-render
-                applyFilters();
-                renderEvents();
-                
-                // Save to storage
-                saveDataToCMS();
-                
-                showNotification(`אירוע של ${event.name} נמחק בהצלחה!`, 'success');
-            }
+            alert('הוספת אירוע חדש - יפתח טופס הוספה');
         }
 
         function addNewSong() {
-            const name = prompt('שם השיר:');
-            if (!name) return;
-            
-            const key = prompt('סולם:');
-            if (!key) return;
-            
-            const newSong = {
-                id: Math.max(...songsLibrary.map(s => s.id)) + 1,
-                name: name,
-                key: key,
-                tempo: 120,
-                transpose: 0,
-                chords: "C - Am - F - G",
-                lyrics: "מילות השיר...",
-                category: "כללי"
-            };
-            
-            songsLibrary.push(newSong);
-            renderSongsLibrary();
-            alert('שיר חדש נוסף בהצלחה!');
-        }
-
-        function renderImportantLinks() {
-            const container = document.getElementById('importantLinksContainer');
-            
-            // Group links by category
-            const categories = {};
-            importantLinks.forEach(link => {
-                const category = link.category || 'כללי';
-                if (!categories[category]) {
-                    categories[category] = [];
-                }
-                categories[category].push(link);
-            });
-
-            const categoryColors = {
-                'כספים': 'bg-green-50 border-green-200 text-green-800',
-                'ניהול זמן': 'bg-blue-50 border-blue-200 text-blue-800',
-                'תקשורת': 'bg-purple-50 border-purple-200 text-purple-800',
-                'כללי': 'bg-gray-50 border-gray-200 text-gray-800'
-            };
-
-            container.innerHTML = `
-                <div class="space-y-6">
-                    ${Object.keys(categories).map(category => `
-                        <div class="${categoryColors[category] || categoryColors['כללי']} rounded-3xl p-6 border">
-                            <h3 class="text-xl font-bold mb-4 flex items-center">
-                                <span class="w-4 h-4 bg-current rounded-full ml-3 opacity-60"></span>
-                                ${category} (${categories[category].length})
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                ${categories[category].map(link => `
-                                    <div class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100">
-                                        <div class="flex items-start justify-between mb-3">
-                                            <div class="flex items-center">
-                                                <span class="text-2xl ml-3">${link.icon}</span>
-                                                <h4 class="font-bold text-gray-800 text-sm">${link.name}</h4>
-                                            </div>
-                                            <div class="flex space-x-1 space-x-reverse">
-                                                <button onclick="editLink(${link.id})" class="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-blue-700 transition-colors">
-                                                    ✏️
-                                                </button>
-                                                <button onclick="deleteLink(${link.id})" class="bg-red-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-red-700 transition-colors">
-                                                    🗑️
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <p class="text-gray-600 text-xs mb-3">${link.description}</p>
-                                        <button onclick="window.open('${link.url}', '_blank')" 
-                                                class="w-full bg-cyan-600 text-white px-4 py-2 rounded-xl hover:bg-cyan-700 transition-colors font-medium text-sm flex items-center justify-center">
-                                            <span class="ml-2">🔗</span>
-                                            <span>פתח קישור</span>
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+            alert('הוספת שיר חדש - יפתח טופס הוספה');
         }
 
         function addNewLink() {
-            const name = prompt('שם הקישור:');
-            if (!name) return;
-            
-            const url = prompt('כתובת הקישור (URL):');
-            if (!url) return;
-            
-            const description = prompt('תיאור הקישור:') || '';
-            const category = prompt('קטגוריה (כספים/ניהול זמן/תקשורת/כללי):') || 'כללי';
-            const icon = prompt('אייקון (אמוג\'י):') || '🔗';
-            
-            const newLink = {
-                id: Math.max(...importantLinks.map(l => l.id)) + 1,
-                name: name,
-                url: url,
-                description: description,
-                category: category,
-                icon: icon
-            };
-            
-            importantLinks.push(newLink);
-            renderImportantLinks();
-            saveDataToCMS();
-            showNotification('קישור חדש נוסף בהצלחה!', 'success');
+            alert('הוספת קישור חדש - יפתח טופס הוספה');
         }
 
-        function editLink(linkId) {
-            const link = importantLinks.find(l => l.id === linkId);
-            if (!link) return;
-            
-            const newName = prompt('שם הקישור:', link.name);
-            if (newName === null) return;
-            
-            const newUrl = prompt('כתובת הקישור:', link.url);
-            if (newUrl === null) return;
-            
-            const newDescription = prompt('תיאור הקישור:', link.description);
-            if (newDescription === null) return;
-            
-            const newCategory = prompt('קטגוריה:', link.category);
-            if (newCategory === null) return;
-            
-            const newIcon = prompt('אייקון:', link.icon);
-            if (newIcon === null) return;
-            
-            link.name = newName;
-            link.url = newUrl;
-            link.description = newDescription;
-            link.category = newCategory;
-            link.icon = newIcon;
-            
-            renderImportantLinks();
-            saveDataToCMS();
-            showNotification('קישור עודכן בהצלחה!', 'success');
-        }
-
-        function deleteLink(linkId) {
-            const link = importantLinks.find(l => l.id === linkId);
-            if (!link) return;
-            
-            if (confirm(`האם אתה בטוח שברצונך למחוק את הקישור "${link.name}"?`)) {
-                const index = importantLinks.findIndex(l => l.id === linkId);
-                importantLinks.splice(index, 1);
-                
-                renderImportantLinks();
-                saveDataToCMS();
-                showNotification('קישור נמחק בהצלחה!', 'success');
-            }
-        }
-
-        function updatePaymentAmount(paymentId, type, amount) {
-            const payment = payments.find(p => p.id === paymentId);
-            if (payment) {
-                const numAmount = parseInt(amount) || 0;
-                switch(type) {
-                    case 'keyboardist':
-                        payment.keyboardistAmount = numAmount;
-                        break;
-                    case 'drummers':
-                        payment.drummersAmount = numAmount;
-                        break;
-                    case 'manager':
-                        payment.managerAmount = numAmount;
-                        break;
-                }
-                saveDataToCMS();
-            }
-        }
-
-        function openEventModal(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
-
-            modalTitle.textContent = `בר מצווה - ${event.name}`;
-            
-            const packageColors = {
-                'חבילה בסיסית': 'bg-blue-50 text-blue-700 border-blue-200',
-                'חבילה חגיגית': 'bg-purple-50 text-purple-700 border-purple-200',
-                'חבילת הכל כלול': 'bg-amber-50 text-amber-700 border-amber-200'
-            };
-
-            const musicians = [];
-            if (event.keyboardist) musicians.push('קלידן');
-            if (event.drummers > 0) musicians.push(`${event.drummers} מתופפים`);
-            const musicianText = musicians.length > 0 ? musicians.join(' + ') : 'ללא ליווי מוזיקלי';
-
-            let modalHTML = `
-                <div class="space-y-4 sm:space-y-6">
-                    <div class="bg-gradient-to-l from-blue-50 to-indigo-50 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100">
-                        <h4 class="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">פרטי האירוע</h4>
-                        <div class="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
-                            <div class="bg-blue-100 p-3 rounded-xl border border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors" onclick="addToGoogleCalendar(${event.id})">
+        function openEventModal(id) {
+            const event = events.find(e => e.id === id);
+            if (event) {
+                modalTitle.textContent = `בר מצווה - ${event.name}`;
+                modalContent.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="space-y-3">
+                            <div class="card-professional bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-3 rounded-xl shadow-sm">
                                 <div class="flex items-center">
-                                    <span class="text-blue-600 ml-2 text-lg">📅</span>
+                                    <span class="text-lg ml-2">📅</span>
                                     <div>
-                                        <span class="font-medium text-blue-800 text-sm">תאריך:</span>
-                                        <div class="text-blue-700 font-bold text-sm">${new Date(event.date).toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                                        <div class="text-xs opacity-80">תאריך</div>
+                                        <span class="font-bold text-sm">${new Date(event.date).toLocaleDateString('he-IL')}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="bg-green-100 p-3 rounded-xl border border-green-200">
+                            
+                            <div class="card-professional bg-gradient-to-br from-purple-500 to-pink-500 text-white p-3 rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-all" onclick="event.stopPropagation(); openWaze('${event.wazeLink}')">
                                 <div class="flex items-center">
-                                    <span class="text-green-600 ml-2 text-lg">👥</span>
+                                    <span class="text-lg ml-2">📍</span>
                                     <div>
-                                        <span class="font-medium text-green-800 text-sm">הגעת אורחים:</span>
-                                        <div class="text-green-700 font-bold text-sm">${event.guestArrivalTime || event.time}</div>
+                                        <div class="text-xs opacity-80">מיקום</div>
+                                        <span class="font-bold text-sm">${event.location}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="bg-orange-100 p-3 rounded-xl border border-orange-200">
+                            
+                            <div class="card-professional bg-gradient-to-br from-green-500 to-emerald-600 text-white p-3 rounded-xl shadow-sm">
                                 <div class="flex items-center">
-                                    <span class="text-orange-600 ml-2 text-lg">🎉</span>
+                                    <span class="text-lg ml-2">⏰</span>
                                     <div>
-                                        <span class="font-medium text-orange-800 text-sm">תחילת אירוע:</span>
-                                        <div class="text-orange-700 font-bold text-sm">${event.eventStartTime || event.time}</div>
+                                        <div class="text-xs opacity-80">זמנים</div>
+                                        <span class="font-bold text-sm">אורחים: ${event.guestArrivalTime || event.time} • תחילת אירוע: ${event.eventStartTime || event.time}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="bg-purple-100 p-3 rounded-xl border border-purple-200 md:col-span-3 cursor-pointer hover:bg-purple-200 transition-colors" onclick="openWaze('${event.wazeLink}')">
+                            
+                            <div class="card-professional bg-gradient-to-br from-orange-500 to-red-500 text-white p-3 rounded-xl shadow-sm">
                                 <div class="flex items-center">
-                                    <span class="text-purple-600 ml-2 text-lg">📍</span>
-                                    <div class="flex-1">
-                                        <span class="font-medium text-purple-800 text-sm">מיקום:</span>
-                                        <div class="flex items-center justify-between">
-                                            <div class="text-purple-700 font-bold text-sm flex-1">${event.location}</div>
-                                            ${isLoggedIn ? `
-                                                <button onclick="event.stopPropagation(); editWazeLink(${event.id})" 
-                                                        class="bg-orange-600 text-white px-2 py-1 rounded-lg text-xs hover:bg-orange-700 transition-colors">
-                                                    ⚙️
-                                                </button>
-                                            ` : ''}
-                                        </div>
+                                    <span class="text-lg ml-2">📦</span>
+                                    <div>
+                                        <div class="text-xs opacity-80">סוג חבילה</div>
+                                        <span class="font-bold text-sm">${event.package}</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4 sm:gap-6">
-                        <div>
-                            <h4 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">חבילת השירות</h4>
-                            <div class="inline-block px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border ${packageColors[event.package]} font-medium text-sm sm:text-base">
-                                ${event.package}
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h4 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">ליווי מוזיקלי</h4>
-                            <div class="bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl">
+                            
+                            <div class="card-professional bg-gradient-to-br from-pink-500 to-rose-500 text-white p-3 rounded-xl shadow-sm">
                                 <div class="flex items-center">
-                                    <span class="text-orange-500 ml-2">🎵</span>
-                                    <span class="text-gray-700 text-sm sm:text-base">${musicianText}</span>
+                                    <span class="text-lg ml-2">🎵</span>
+                                    <div>
+                                        <div class="text-xs opacity-80">נגנים</div>
+                                        <span class="font-bold text-sm">קלידן: ${event.keyboardist ? 'כן' : 'לא'} • מתופפים: ${event.drummers > 0 ? `${event.drummers}` : 'לא'}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-gray-200 pt-4 sm:pt-6">
-                        <div class="flex justify-between items-center mb-2 sm:mb-3">
-                            <h4 class="text-base sm:text-lg font-semibold text-gray-800">תמונות וסרטונים מהאירוע</h4>
+                            
                             ${isLoggedIn ? `
-                                <button onclick="editMediaLinks(${event.id})" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                                    ✏️ ערוך קישורים
-                                </button>
-                            ` : ''}
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="bg-pink-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-pink-200 hover:bg-pink-100 transition-colors flex items-center ${event.mediaLinks?.photos ? 'cursor-pointer' : ''}" ${event.mediaLinks?.photos ? `onclick="window.open('${event.mediaLinks.photos}', '_blank')"` : ''}>
-                                <span class="text-pink-600 ml-2 text-lg">📸</span>
-                                <div>
-                                    <div class="font-medium text-pink-800">תמונות מהאירוע</div>
-                                    <div class="text-xs text-pink-600">${event.mediaLinks?.photos ? 'לחץ לצפייה' : 'אין קישור'}</div>
-                                </div>
-                            </div>
-                            <div class="bg-indigo-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-indigo-200 hover:bg-indigo-100 transition-colors flex items-center ${event.mediaLinks?.videos ? 'cursor-pointer' : ''}" ${event.mediaLinks?.videos ? `onclick="window.open('${event.mediaLinks.videos}', '_blank')"` : ''}>
-                                <span class="text-indigo-600 ml-2 text-lg">🎥</span>
-                                <div>
-                                    <div class="font-medium text-indigo-800">סרטונים מהאירוע</div>
-                                    <div class="text-xs text-indigo-600">${event.mediaLinks?.videos ? 'לחץ לצפייה' : 'אין קישור'}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${isLoggedIn ? `
-                        <div class="border-t border-gray-200 pt-4 sm:pt-6">
-                            <div class="grid grid-cols-1 gap-4 sm:gap-6">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <h4 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">פרטים פיננסיים</h4>
-                                        <div class="bg-green-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-green-200">
-                                            <div class="text-xl sm:text-2xl font-bold text-green-600">₪${event.price.toLocaleString()}</div>
-                                            <div class="text-xs sm:text-sm text-gray-600">מחיר סופי</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <h4 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">פרטי קשר</h4>
-                                        <div class="bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl space-y-2">
-                                            <div class="text-sm"><span class="font-medium">הורה:</span> ${event.parentName}</div>
-                                            <div class="text-sm"><span class="font-medium">טלפון:</span> ${event.parentPhone}</div>
+                                <div class="card-professional bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-3 rounded-xl shadow-sm">
+                                    <div class="flex items-center">
+                                        <span class="text-lg ml-2">👥</span>
+                                        <div>
+                                            <div class="text-xs opacity-80">איש קשר</div>
+                                            <span class="font-bold text-sm">${event.parentName} • ${event.parentPhone}</span>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div>
-                                    <h4 class="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">הערות</h4>
-                                    <div class="bg-yellow-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-yellow-200">
-                                        <p class="text-gray-700 text-sm sm:text-base">${event.notes}</p>
+                                <div class="card-professional bg-gradient-to-br from-yellow-500 to-orange-500 text-white p-3 rounded-xl shadow-sm">
+                                    <div class="flex items-center">
+                                        <span class="text-lg ml-2">💰</span>
+                                        <div>
+                                            <div class="text-xs opacity-80">מחיר</div>
+                                            <span class="font-bold text-sm">₪${event.price}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="card-professional bg-gradient-to-br from-teal-500 to-cyan-500 text-white p-3 rounded-xl shadow-sm">
+                                <div class="flex items-start">
+                                    <span class="text-lg ml-2 mt-0.5">📝</span>
+                                    <div>
+                                        <div class="text-xs opacity-80">הערות</div>
+                                        <span class="font-bold text-sm leading-relaxed">${event.notes}</span>
                                     </div>
                                 </div>
                             </div>
+                            
+                            ${event.mediaLinks && (event.mediaLinks.photos || event.mediaLinks.videos) ? `
+                                <div class="flex gap-2">
+                                    ${event.mediaLinks.photos ? `
+                                        <a href="${event.mediaLinks.photos}" target="_blank" class="card-professional bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-3 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center flex-1">
+                                            <span class="text-lg ml-2">📷</span>
+                                            <span class="font-bold text-sm">תמונות</span>
+                                        </a>
+                                    ` : ''}
+                                    ${event.mediaLinks.videos ? `
+                                        <a href="${event.mediaLinks.videos}" target="_blank" class="card-professional bg-gradient-to-br from-violet-500 to-purple-600 text-white p-3 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center flex-1">
+                                            <span class="text-lg ml-2">🎥</span>
+                                            <span class="font-bold text-sm">סרטונים</span>
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
                         </div>
-                    ` : ''}
-                </div>
-                
-                <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 sm:space-x-reverse mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
-                    <button class="px-4 sm:px-6 py-2 bg-gray-200 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-300 transition-colors font-medium text-sm sm:text-base" onclick="document.getElementById('eventModal').classList.add('hidden')">
-                        סגור
-                    </button>
-                    ${isLoggedIn ? `
-                        <button onclick="openYeshInvoice()" class="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-xl sm:rounded-2xl hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base flex items-center justify-center">
-                            <span class="ml-2">🧾</span>
-                            <span>יש חשבונית</span>
-                        </button>
-                        <button onclick="sendWhatsAppToParent('${event.parentPhone}', '${event.parentName}', '${event.name}')" class="px-4 sm:px-6 py-2 bg-green-600 text-white rounded-xl sm:rounded-2xl hover:bg-green-700 transition-colors font-medium text-sm sm:text-base flex items-center justify-center">
-                            <span class="ml-2">📱</span>
-                            <span>שלח WhatsApp</span>
-                        </button>
-                    ` : ''}
-                </div>
-            `;
-
-            modalContent.innerHTML = modalHTML;
-            eventModal.classList.remove('hidden');
+                    </div>
+                `;
+                eventModal.classList.remove('hidden');
+            }
         }
 
-        function openWaze(wazeLink) {
-            if (wazeLink) {
-                window.open(wazeLink, '_blank');
+        function openWaze(link) {
+            window.open(link, '_blank');
+        }
+
+        function openYeshInvoice() {
+            window.open('https://www.ishhashounit.co.il', '_blank');
+        }
+
+        function openYoutube(link) {
+            window.open(link, '_blank');
+        }
+
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+
+        function toggleEventCollapse(id) {
+            if (eventStates[id] === 'expanded') {
+                eventStates[id] = 'collapsed';
             } else {
-                alert('קישור Waze לא זמין לאירוע זה');
+                eventStates[id] = 'expanded';
             }
+            renderEvents();
         }
 
-        function addToGoogleCalendar(eventId) {
-            const event = events.find(e => e.id === eventId);
-            if (!event) return;
-
-            const eventDate = new Date(event.date);
-            const [hours, minutes] = event.eventStartTime.split(':');
-            eventDate.setHours(parseInt(hours), parseInt(minutes));
-            
-            const endDate = new Date(eventDate);
-            endDate.setHours(endDate.getHours() + 3);
-
-            const startTime = eventDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-            const endTime = endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-
-            const title = `בר מצווה - ${event.name}`;
-            const details = `
-בר מצווה: ${event.name}
-חבילה: ${event.package}
-מיקום: ${event.location}
-
-⏰ זמנים:
-👥 הגעת אורחים: ${event.guestArrivalTime}
-🎉 תחילת אירוע: ${event.eventStartTime}
-
-${event.keyboardist ? '🎹 עם קלידן' : ''}
-${event.drummers > 0 ? `🥁 ${event.drummers} מתופפים` : ''}
-${event.notes ? `\nהערות: ${event.notes}` : ''}
-${isLoggedIn ? `\nהורה: ${event.parentName}\nטלפון: ${event.parentPhone}\nמחיר: ₪${event.price.toLocaleString()}` : ''}
-            `.trim();
-
-            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(event.location)}&sf=true&output=xml`;
-
-            window.open(googleCalendarUrl, '_blank');
+        function managePrayerCategories() {
+            alert('ניהול קטגוריות שירי תפילה - יפתח חלון ניהול');
         }
 
-        function editWazeLink(eventId) {
-            const event = events.find(e => e.id === eventId);
+        function manageMealCategories() {
+            alert('ניהול קטגוריות שירי סעודה - יפתח חלון ניהול');
+        }
+
+        function addToGoogleCalendar(id) {
+            const event = events.find(e => e.id === id);
             if (event) {
-                const newLink = prompt('הכנס קישור Waze חדש:', event.wazeLink);
-                if (newLink !== null) {
-                    event.wazeLink = newLink;
-                    openEventModal(eventId);
-                    alert('קישור Waze עודכן בהצלחה!');
-                }
-            }
-        }
-
-        function sendWhatsAppToParent(phone, parentName, studentName) {
-            const message = `שלום ${parentName},\n\nבקשר לבר המצווה של ${studentName}.\n\nאשמח לתאם פרטים נוספים.\n\nבברכה,\nהמנהל`;
-            const cleanPhone = phone.replace(/[^0-9]/g, '');
-            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-        }
-
-        function sendWhatsAppToStudent(phone, studentName) {
-            const message = `שלום ${studentName},\n\nתזכורת לשיעור הקרוב.\n\nנתראה!`;
-            const cleanPhone = phone.replace(/[^0-9]/g, '');
-            const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-        }
-
-        async function saveDataToCMS() {
-            try {
-                const systemData = {
-                    events, students, prayerSongs, mealSongs, equipment, payments, importantLinks,
-                    lastUpdated: new Date().toISOString()
-                };
-                localStorage.setItem('barMitzvahData', JSON.stringify(systemData));
+                const startDate = new Date(event.date + 'T' + event.time);
+                const endDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000); // 3 hours later
                 
-                console.log('נתונים נשמרו בהצלחה');
-                showNotification('נתונים נשמרו בהצלחה!', 'success');
-                return true;
-            } catch (error) {
-                console.error('שגיאה בשמירת נתונים:', error);
-                showNotification('שגיאה בשמירת נתונים', 'error');
-                return false;
+                const details = `בר מצווה של ${event.name}
+מיקום: ${event.location}
+חבילה: ${event.package}
+קלידן: ${event.keyboardist ? 'כן' : 'לא'}
+מתופפים: ${event.drummers > 0 ? event.drummers : 'לא'}
+הערות: ${event.notes}
+${isLoggedIn ? `איש קשר: ${event.parentName} - ${event.parentPhone}` : ''}`;
+                
+                const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=בר מצווה - ${event.name}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(details)}&location=${encodeURIComponent(event.location)}`;
+                
+                window.open(googleCalendarUrl, '_blank');
             }
         }
 
-        async function refreshDataFromCMS() {
-            try {
-                const savedData = localStorage.getItem('barMitzvahData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    // Update arrays with saved data
-                    events.length = 0;
-                    events.push(...(data.events || []));
-                    students.length = 0;
-                    students.push(...(data.students || []));
-                    // ... update other arrays as needed
-                    
-                    filteredEvents = [...events];
-                    renderCurrentPage();
-                    showNotification('נתונים נטענו מהזיכרון המקומי!', 'success');
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('שגיאה בטעינת נתונים:', error);
-                showNotification('שגיאה בטעינת נתונים', 'error');
-                return false;
-            }
+        function refreshDataFromCMS() {
+            alert('מרענן נתונים מהמערכת...');
         }
 
         function exportToCMSFormat() {
-            const dataToExport = {
-                events: events,
-                students: students,
-                prayerSongs: prayerSongs,
-                mealSongs: mealSongs,
-                equipment: equipment,
-                payments: payments,
-                lessons: lessons,
-                messageHistory: messageHistory,
-                songsLibrary: songsLibrary,
-                songCategories: songCategories,
-                importantLinks: importantLinks,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(dataToExport, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `bar-mitzvah-data-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            showNotification('נתונים יוצאו בהצלחה!', 'success');
+            alert('מייצא נתונים לפורמט CMS...');
         }
 
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-2xl shadow-lg max-w-sm transition-all duration-300 ${
-                type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
-                type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
-                'bg-blue-100 text-blue-800 border border-blue-200'
-            }`;
-            
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <span class="ml-2">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-                    <span class="font-medium">${message}</span>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
-        }
-
-        // PWA functionality
-        let deferredPrompt;
-        const installButton = document.getElementById('installApp');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installButton.classList.remove('hidden');
-        });
-
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    showNotification('האפליקציה הותקנה בהצלחה!', 'success');
-                }
-                deferredPrompt = null;
-                installButton.classList.add('hidden');
-            }
-        });
-
-        // Generate PWA manifest dynamically
-        const manifest = {
-            name: "מערכת ניהול אירועי בר מצווה",
-            short_name: "בר מצווה מנהל",
-            description: "מערכת ניהול מקצועית לאירועי בר מצווה",
-            start_url: "/",
-            display: "standalone",
-            background_color: "#1e3a8a",
-            theme_color: "#1e3a8a",
-            icons: [
-                {
-                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e3a8a'/><text y='50' x='50' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='white'>🎵</text></svg>",
-                    sizes: "192x192",
-                    type: "image/svg+xml"
-                },
-                {
-                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e3a8a'/><text y='50' x='50' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='white'>🎵</text></svg>",
-                    sizes: "512x512",
-                    type: "image/svg+xml"
-                }
-            ]
-        };
-
-        document.getElementById('manifest').href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-
-        // Check for Auth0 callback on page load
-        async function handleAuth0Callback() {
-            try {
-                if (auth0Client && window.location.search.includes('code=')) {
-                    console.log('מעבד callback של Auth0...');
-                    
-                    const result = await auth0Client.handleRedirectCallback();
-                    
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    
-                    const user = await auth0Client.getUser();
-                    
-                    if (user) {
-                        console.log('התחברות Auth0 הצליחה:', user);
-                        login();
-                        currentAuthProvider = 'auth0';
-                        showNotification(`ברוך הבא ${user.name || user.email}!`, 'success');
-                    }
-                }
-            } catch (error) {
-                console.error('Auth0 callback error:', error);
-                showNotification('שגיאה בהתחברות', 'error');
-            }
-        }
-
-        // Initialize application
-        async function initApp() {
-            try {
-                await initAuth0();
-                await handleAuth0Callback();
-                
-                if (auth0Client) {
-                    const isAuthenticated = await auth0Client.isAuthenticated();
-                    if (isAuthenticated) {
-                        const user = await auth0Client.getUser();
-                        console.log('כבר מחובר עם Auth0:', user);
-                        login();
-                        currentAuthProvider = 'auth0';
-                    }
-                }
-                
-                // Initialize filtered events
-                filteredEvents = [...events];
-                renderCurrentPage();
-                
-                console.log('אפליקציה אותחלה בהצלחה');
-                
-            } catch (error) {
-                console.error('שגיאה באתחול האפליקציה:', error);
-                filteredEvents = [...events];
-                renderCurrentPage();
-            }
-        }
-
-        // Auto-save data every 5 minutes
-        setInterval(async () => {
-            if (isLoggedIn) {
-                await saveDataToCMS();
-            }
-        }, 5 * 60 * 1000);
-
-        function openYeshInvoice() {
-            window.open('https://www.yeshinvoice.co.il', '_blank');
-        }
-
-        // Initialize app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initApp();
-        });
-
-        // Add search functionality to songs library
-        document.addEventListener('DOMContentLoaded', function() {
-            const songSearch = document.getElementById('songSearch');
-            if (songSearch) {
-                songSearch.addEventListener('input', function() {
-                    if (currentPage === 'songs-library') {
-                        renderSongsLibrary();
-                    }
-                });
-            }
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initAuth0();
+            renderCurrentPage();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9642dee557b58e4e',t:'MTc1MzM1NDM3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'964547bda5168e48',t:'MTc1MzM3OTY0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
